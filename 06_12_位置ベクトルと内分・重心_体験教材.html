@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>位置ベクトルと内分・重心 ー 体験教材</title>
+<style>
+/* =========================================================================
+   APP-COMMON-CSS-START
+   ========================================================================= */
+:root{
+  --n-color:#1d4ed8;
+  --n-bg:#e5edfc;
+  --an-color:#0f7a3d;
+  --an-bg:#e2f5e9;
+  --rule-color:#be185d;
+  --rule-bg:#fce7f3;
+  --correct:#178a43;
+  --correct-bg:#e5f7ec;
+  --caution:#c65a12;
+  --caution-bg:#fdf0e4;
+  --bg:#f6f7fa;
+  --card:#ffffff;
+  --border:#dfe3ea;
+  --text:#20242c;
+  --text-soft:#666f7d;
+  --radius:14px;
+  --radius-sm:8px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic Medium","Yu Gothic","Meiryo",system-ui,-apple-system,sans-serif;
+  line-height:1.75;
+  font-size:16px;
+  -webkit-font-smoothing:antialiased;
+}
+#app{max-width:840px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;}
+button{font-family:inherit;cursor:pointer;}
+button:focus-visible, input:focus-visible{outline:3px solid #93b4f7;outline-offset:2px;}
+input[type=number]{font-family:inherit;font-size:1.05em;}
+#app-header{
+  padding:14px 18px 10px;
+  background:var(--card);
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:10;
+}
+.header-title{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.82em;color:var(--text-soft);margin:0 0 8px;letter-spacing:.02em;}
+.header-title .ht-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.lap-badge{background:var(--an-bg);color:var(--an-color);border-radius:999px;padding:2px 10px;font-size:.9em;font-weight:700;white-space:nowrap;flex:0 0 auto;}
+.stage-dots{display:flex;align-items:center;gap:6px;}
+.stage-dot{
+  flex:1;
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  font-size:.72em;color:var(--text-soft);
+}
+.stage-dot .dot{
+  width:26px;height:26px;border-radius:50%;
+  background:#eceff3;border:2px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:.9em;color:var(--text-soft);
+  transition:all .2s;
+}
+.stage-dot.active .dot{background:var(--n-color);border-color:var(--n-color);color:#fff;}
+.stage-dot.done .dot{background:var(--an-bg);border-color:var(--an-color);color:var(--an-color);}
+.stage-dot.active{color:var(--n-color);font-weight:700;}
+.stage-sub{font-size:.78em;color:var(--text-soft);margin-top:6px;}
+#app-main{flex:1;padding:18px 18px 30px;}
+.panel{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:18px;
+  margin-bottom:16px;
+}
+h2.stage-title{font-size:1.25em;margin:0 0 6px;}
+p.stage-goal{color:var(--text-soft);font-size:.92em;margin:0 0 14px;}
+p.lead{margin:0 0 12px;font-size:.97em;}
+.small-note{font-size:.85em;color:var(--text-soft);margin-top:8px;}
+.chip{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:3px 10px;border-radius:999px;font-size:.88em;font-weight:700;
+}
+.chip-n{background:var(--n-bg);color:var(--n-color);}
+.chip-an{background:var(--an-bg);color:var(--an-color);}
+.chip-rule{background:var(--rule-bg);color:var(--rule-color);}
+.seq-row{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin:14px 0;}
+.term-card{
+  border:2px solid var(--border);background:var(--card);
+  border-radius:10px;padding:8px 4px 10px;min-width:58px;text-align:center;
+  cursor:default;
+}
+.term-card .n-label{color:var(--n-color);font-size:.76em;font-weight:700;}
+.term-card .val{font-size:1.25em;font-weight:800;color:var(--text);margin-top:2px;}
+.term-card.dots{cursor:default;border-style:dashed;color:var(--text-soft);}
+.btn-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;}
+.btn{
+  border:2px solid var(--border);background:#fff;color:var(--text);
+  padding:9px 16px;border-radius:10px;font-size:.95em;font-weight:700;
+}
+.btn:hover{border-color:var(--n-color);}
+.btn.primary{background:var(--n-color);border-color:var(--n-color);color:#fff;}
+.btn.primary:hover{background:#1a44b8;}
+.btn.ghost{background:transparent;}
+.btn.selected{border-color:var(--rule-color);background:var(--rule-bg);color:var(--rule-color);}
+.btn.correct-ans{border-color:var(--correct);background:var(--correct-bg);color:var(--correct);}
+.btn:disabled{opacity:.45;cursor:not-allowed;}
+.btn.sm{padding:6px 12px;font-size:.85em;}
+.btn.complete{background:var(--correct);border-color:var(--correct);color:#fff;}
+.btn.complete:hover{background:#0f6b34;}
+.btn.complete.done{background:var(--correct-bg);color:var(--correct);}
+.feedback{border-radius:10px;padding:12px 14px;margin-top:12px;font-size:.94em;}
+.feedback.ok{background:var(--correct-bg);color:var(--correct);border:1.5px solid var(--correct);}
+.feedback.warn{background:var(--caution-bg);color:var(--caution);border:1.5px solid var(--caution);}
+.feedback b{display:block;margin-bottom:2px;font-size:1.02em;}
+.frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 3px;font-size:.92em;line-height:1.15;}
+.frac .num{padding:0 5px 2px;border-bottom:2px solid currentColor;}
+.frac .den{padding:2px 5px 0;}
+.math-lg{font-size:1.35em;font-weight:700;}
+.fix-change{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:14px;}
+.fc-box{border-radius:10px;padding:10px;text-align:center;font-size:.85em;}
+.fc-box .fc-label{font-weight:700;margin-bottom:4px;display:block;}
+.fc-box.fixed{background:var(--rule-bg);color:var(--rule-color);}
+.fc-box.change{background:var(--n-bg);color:var(--n-color);}
+.fc-box.result{background:var(--an-bg);color:var(--an-color);}
+.fc-box .fc-val{font-weight:800;font-size:1.1em;margin-top:2px;}
+.step-flow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:14px 0;}
+.step-box{
+  border:2px solid var(--border);border-radius:10px;padding:10px 14px;text-align:center;min-width:80px;background:#fff;
+}
+.step-box .step-label{font-size:.75em;color:var(--text-soft);margin-bottom:3px;}
+.step-arrow{color:var(--text-soft);font-size:1.3em;}
+.flow-vert{display:flex;flex-direction:column;gap:8px;margin:14px 0;}
+.flow-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.flow-arrow-down{color:var(--text-soft);font-size:1.2em;padding-left:6px;}
+.flow-result{border:2px solid var(--rule-color);background:var(--rule-bg);border-radius:10px;padding:12px 16px;text-align:center;color:var(--rule-color);font-weight:800;}
+.flow-badge{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:0 0 10px;}
+.flow-badge .arrow{color:var(--text-soft);font-size:.9em;}
+table.verify{width:100%;border-collapse:collapse;margin-top:12px;font-size:.92em;}
+table.verify th,table.verify td{border:1px solid var(--border);padding:7px 8px;text-align:center;}
+table.verify th{background:#f2f4f8;color:var(--text-soft);font-weight:700;}
+table.verify td.mark-ok{color:var(--correct);font-weight:800;}
+table.verify td.mark-ng{color:var(--caution);font-weight:800;}
+.check-item{display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid var(--border);font-size:.95em;}
+.check-item:last-child{border-bottom:none;}
+.check-item input{width:19px;height:19px;accent-color:var(--an-color);}
+.quiz-given{background:#f7f9fc;border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:10px;font-size:.92em;}
+.quiz-q{font-weight:700;margin-bottom:10px;}
+.quiz-options{display:flex;flex-wrap:wrap;gap:8px;}
+#app-footer{
+  position:sticky;bottom:0;background:var(--card);border-top:1px solid var(--border);
+  padding:12px 18px;display:flex;gap:10px;justify-content:space-between;
+}
+#app-footer .btn{flex:1;text-align:center;}
+#app-footer .btn.restart{flex:0 0 auto;}
+@media (max-width:520px){
+  .fix-change{grid-template-columns:1fr;}
+  #app-main{padding:14px 12px 24px;}
+  .panel{padding:14px;}
+  .stage-dot{font-size:.62em;}
+  .stage-dot .dot{width:22px;height:22px;font-size:.8em;}
+}
+@media print{
+  #app-footer, .btn, .quiz-options, input{display:none !important;}
+  #app-header{position:static;}
+  body{background:#fff;}
+  .lap-badge{display:none !important;}
+}
+/* =========================================================================
+   APP-COMMON-CSS-END
+   ========================================================================= */
+/* =========================================================================
+   LESSON-SPECIFIC-CSS-START
+   ベクトル教材固有：矢印図SVG（.vec-svg）と用語対応表。
+   ========================================================================= */
+.vec-svg-wrap{display:flex;justify-content:center;margin:14px 0 6px;}
+.vec-svg{width:100%;max-width:360px;height:auto;background:#fbfcfe;border:1px solid var(--border);border-radius:10px;}
+.vec-svg .grid-line{stroke:#e3e7ee;stroke-width:1;}
+.vec-svg .axis-line{stroke:#b7bfcc;stroke-width:1.5;}
+.vec-svg .axis-label{fill:var(--text-soft);font-size:11px;font-weight:700;}
+.vec-svg .vlabel{font-size:14px;font-weight:800;paint-order:stroke;stroke:#fbfcfe;stroke-width:3.5px;stroke-linejoin:round;}
+.vec-svg .vlabel.blue{fill:var(--n-color);}
+.vec-svg .vlabel.green{fill:var(--an-color);}
+.vec-svg .vlabel.purple{fill:var(--rule-color);}
+.vec-svg .helper-line{stroke:var(--text-soft);stroke-width:1.3;stroke-dasharray:4 3;}
+.vec-svg .helper-label{fill:var(--text-soft);font-size:11px;font-weight:700;paint-order:stroke;stroke:#fbfcfe;stroke-width:3px;stroke-linejoin:round;}
+.vec-svg .zero-dot{fill:var(--rule-color);}
+.vec-svg .pt-dot{fill:var(--n-color);}
+.vec-svg .pt-dot.green{fill:var(--an-color);}
+.vec-svg .pt-dot.purple{fill:var(--rule-color);}
+.vec-legend{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:4px;font-size:.82em;}
+.vec-legend .lg{display:inline-flex;align-items:center;gap:5px;font-weight:700;}
+.vec-legend .swatch{width:22px;height:0;border-top:3px solid;border-radius:2px;}
+.vec-legend .lg.blue{color:var(--n-color);}
+.vec-legend .lg.green{color:var(--an-color);}
+.vec-legend .lg.purple{color:var(--rule-color);}
+/* 切り替え操作の状態表示（何回切り替えたか・今どちらの状態か） */
+.toggle-state{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px;font-size:.85em;color:var(--text-soft);}
+.toggle-state .now{background:var(--n-bg);color:var(--n-color);border-radius:999px;padding:2px 10px;font-weight:700;}
+table.terms{width:100%;border-collapse:collapse;margin:12px 0;font-size:.92em;}
+table.terms th,table.terms td{border:1px solid var(--border);padding:8px;text-align:center;}
+table.terms th{background:#f2f4f8;color:var(--text-soft);font-weight:700;}
+/* =========================================================================
+   LESSON-SPECIFIC-CSS-END
+   ========================================================================= */
+</style>
+</head>
+<body>
+<div id="app">
+  <header id="app-header"></header>
+  <main id="app-main"></main>
+  <footer id="app-footer"></footer>
+</div>
+<script>
+'use strict';
+/* =========================================================================
+   LESSON-SPECIFIC-DATA-START
+   ========================================================================= */
+var LESSON_ID = '06';
+var TEXTBOOK_REF = '教科書 p.31〜35（位置ベクトル・内分点・外分点・重心）';
+var CHART_REF = '黄チャート p.527〜533（基本事項1・基本例題23〜26・ピンポイント解説）';
+var STEPS = ['s1', 's2', 's3', 's4', 'summary'];
+var STAGE_LABEL = { s1:'ステージ1', s2:'ステージ2', s3:'ステージ3', s4:'ステージ4', summary:'まとめ' };
+var STAGE_SUBLABEL = {
+  s1:'点を矢印で表す',
+  s2:'内分点を式で表す',
+  s3:'中点と外分点',
+  s4:'3点の重心',
+  summary:'今日の理解を確認する'
+};
+var DOT_INDEX = { s1:0, s2:1, s3:2, s4:3, summary:4 };
+var DOT_LABELS = ['1', '2', '3', '4', 'まとめ'];
+function flowBadgeInner(){
+  return '<span class="chip chip-n">基準点</span><span class="arrow">→</span>'
+       + '<span class="chip chip-an">位置ベクトル</span><span class="arrow">→</span>'
+       + '<span class="chip chip-rule">内分・重心の式</span>';
+}
+function newQuizState(){ return { qid:null, selected:null, answered:false, attempts:0, showAnswer:false }; }
+function s1QuizPool(){
+  return [
+    { id:'pos-def', ask:'基準点Oを決めて、点Aの位置を表す矢印 OA↑ を何といいますか。',
+      correct:'位置ベクトル', options:['自由ベクトル','単位ベクトル','位置ベクトル'],
+      hints:['基準となる点Oからの矢印である点に注目しましょう。',
+        '位置を表すための矢印なので、名前もそのままです。'],
+      reason:'基準点Oからの矢印 OA↑ を、点Aの位置ベクトルといいます。' },
+    { id:'ab-def', ask:'点A、点Bの位置ベクトルがそれぞれ a、b のとき、AB↑ はどう表せますか。',
+      correct:'b−a', options:['a−b','a+b','b−a'],
+      hints:['AB↑ は「Aの位置からBの位置までの移動」です。',
+        '02で学んだ引き算 (終点)−(始点) を、位置ベクトルにも当てはめましょう。'],
+      reason:'AB↑=(Bの位置ベクトル)−(Aの位置ベクトル)=b−a です。a−b にすると逆向き（BA↑）になってしまいます。' },
+    { id:'origin-indep', ask:'基準点Oを別の点O′に変えると、AB↑=b−a という関係は変わりますか。',
+      correct:'変わらない（AB↑はO,O′どちらでも同じ）',
+      options:['変わらない（AB↑はO,O′どちらでも同じ）','O′のときだけ成り立たなくなる','AB↑の向きが逆になる'],
+      hints:['AB↑ はA、Bという2点だけで決まる矢印です。',
+        'a、bの値そのものはOの取り方で変わりますが、その差 b−a は変わりません。'],
+      reason:'a、bの値は基準点Oの取り方によって変わりますが、差 b−a（＝AB↑）はどのOを選んでも変わりません。' }
+  ];
+}
+var S2_MC_OPTIONS = ['(a+2b)/3', '(2a+b)/3', '(a+b)/3'];
+var S2_MC_CORRECT = '(2a+b)/3';
+function s2QuizPool(){
+  return [
+    { id:'ratio-31', ask:'線分ABを3:1に内分する点Pの位置ベクトルpは、a,bを使ってどう表せますか。',
+      correct:'(a+3b)/4', options:['(3a+b)/4','(a+b)/4','(a+3b)/4'],
+      hints:['m:nに内分するとき、aの係数にはnが、bの係数にはmがかかります（たすき掛け）。',
+        'm=3,n=1なので、aにはn=1、bにはm=3がかかります。'],
+      reason:'AP:PB=3:1のとき p=(1・a+3・b)/(3+1)=(a+3b)/4 です。aの係数にはAP側の比3ではなくPB側の比1がかかる「たすき掛け」に注意しましょう。' },
+    { id:'midpoint-eq', ask:'線分ABの中点Mの位置ベクトルは、内分点の公式で m:n をどうしたときの式と同じですか。',
+      correct:'m:n=1:1', options:['m:n=1:1','m:n=2:1','m:n=1:0'],
+      hints:['中点は、AとBをちょうど半分に分ける点です。',
+        '比が1:1のときの内分点の公式 (a+b)/2 と同じ形になります。'],
+      reason:'中点は1:1に内分する点なので、公式に m=n=1 を当てはめると (a+b)/2 になります。' },
+    { id:'coef-check', ask:'線分ABを m:n に内分する点の式 p=(na+mb)/(m+n) で、a にかかる係数はどちらの比ですか。',
+      correct:'B側の比n', options:['A側の比m','B側の比n','m+n'],
+      hints:['公式のaの前についている文字を見ましょう。',
+        'aにかかっているのはmではなくnです。'],
+      reason:'公式 p=(na+mb)/(m+n) では、aにはn（B側の比）、bにはm（A側の比）がかかります。取り違えやすいので注意しましょう。' }
+  ];
+}
+function s3QuizPool(){
+  return [
+    { id:'ext-formula', ask:'線分ABを2:1に外分する点Qの位置ベクトルは、a,bを使ってどう表せますか。',
+      correct:'−a+2b', options:['a+2b','2a−b','−a+2b'],
+      hints:['外分点の公式は、内分点の公式のnを−nに変えたものです。',
+        'm=2,n=−1として (na+mb)/(m+n) に当てはめましょう。'],
+      reason:'外分点は内分点の公式の n を −n に置きかえます。m=2,n=−1のとき q=(−a+2b)/(2−1)=−a+2b です。' },
+    { id:'ext-vs-int', ask:'外分点の公式は、内分点の公式とどこが違いますか。',
+      correct:'比の一方の符号を負にする', options:['比の一方の符号を負にする','分母のm+nを2倍にする','aとbを入れかえる'],
+      hints:['「外」に分けるので、点は線分ABの延長線上にあります。',
+        '公式のnを−nにするだけで外分点になります。'],
+      reason:'外分点は、内分点の公式で比の一方の符号を負にした式で表されます（例：n→−n）。' },
+    { id:'midpoint-is-int', ask:'中点は、内分・外分のどちらの特別な場合ですか。',
+      correct:'内分（比が1:1の場合）', options:['外分（比が1:1の場合）','内分（比が1:1の場合）','どちらでもない'],
+      hints:['中点は線分ABの「内側」にありますか、それとも「外側」にありますか。',
+        '線分の内側にある点は内分点です。'],
+      reason:'中点は線分ABの内側にある点なので、内分点の特別な場合（m:n=1:1）です。' }
+  ];
+}
+function s4QuizPool(){
+  return [
+    { id:'centroid-formula', ask:'三角形ABCの重心Gの位置ベクトルは、a,b,cを使ってどう表せますか。',
+      correct:'(a+b+c)/3', options:['(a+b+c)/3','(a+b+c)/2','a+b+c'],
+      hints:['重心は3点の位置ベクトルの「平均」です。',
+        '平均は、足して3で割ります。'],
+      reason:'重心の位置ベクトルは3点の位置ベクトルの平均 (a+b+c)/3 です。' },
+    { id:'centroid-median', ask:'三角形の重心Gは、頂点Cから辺ABの中点Mまでの線分（中線）を、どんな比に内分する点ですか。',
+      correct:'2:1（頂点側が2）', options:['1:1（中点）','2:1（頂点側が2）','1:2（頂点側が1）'],
+      hints:['重心は中線を3等分した点のうち、頂点に近い方から数えて2番目にあります。',
+        '頂点からGまでの距離は、Gから中点までの距離の2倍です。'],
+      reason:'重心Gは中線CMを、頂点C側から2:1に内分する点です（CG:GM=2:1）。' },
+    { id:'centroid-check', ask:'点Pの位置ベクトルが (a+b+c)/3 と表せるとき、点Pはどんな点だと言えますか。',
+      correct:'三角形ABCの重心', options:['辺ABの中点','三角形ABCの重心','辺ABを2:1に内分する点'],
+      hints:['3点の位置ベクトルの平均になっている点に注目しましょう。',
+        '(a+b+c)/3 という形は、重心の公式そのものです。'],
+      reason:'(a+b+c)/3 は三角形ABCの重心の位置ベクトルの公式なので、点Pは重心です。' }
+  ];
+}
+var SUMMARY_POINTS = [
+  '基準点Oを決めると、点Aの位置は矢印 OA↑=a（位置ベクトル）で表せる。AB↑=b−a はOの取り方に関係なく一定',
+  '線分ABを m:n に内分する点Pの位置ベクトルは p=(na+mb)/(m+n)。aにはn、bにはmがかかる（たすき掛け）',
+  '中点は1:1に内分する点で (a+b)/2。外分点は内分の公式のnを−nにして求める',
+  '三角形ABCの重心Gの位置ベクトルは (a+b+c)/3。頂点から対辺の中点までの中線を2:1に内分する点でもある'
+];
+var SUMMARY_QA = [
+  { q:'線分ABを1:2に内分する点と2:1に内分する点では、なぜ a と b の係数が入れかわるのですか。自分の言葉で説明してみましょう。',
+    points:['公式 p=(na+mb)/(m+n) では、aにn（B側の比）、bにm（A側の比）がかかるから',
+      '比の数字とかかる文字が「たすき掛け」の関係になっているから'] },
+  { q:'重心の位置ベクトル (a+b+c)/3 は、内分点の公式とどうつながっていますか。',
+    points:['重心は中線を頂点側から2:1に内分する点でもあるから',
+      '3点の位置ベクトルの平均を取ると、内分点の考え方と同じ式にたどり着くから'] }
+];
+var CHECKLIST_ITEMS = [
+  TEXTBOOK_REF + 'を読み返し、内分点の公式 p=(na+mb)/(m+n) を自分の言葉で説明できるか確認する',
+  CHART_REF + 'を見て、外分点・重心の公式を使った問題の考え方を確認する'
+];
+function initialState(){
+  return {
+    stepIndex: 0,
+    navMsg: null,
+    s1: { quiz:newQuizState() },
+    /* ratioState: 今どちらの比で内分点を見ているか（'1:2'/'2:1'、何度でも切り替えられる）
+       ratioEverSwapped: 一度でも2:1を見たか（段階ゲートの判定に使う）
+       ratioCount: 切り替えた回数（体験の記録として表示する） */
+    s2: { ratioState:'1:2', ratioEverSwapped:false, ratioCount:0,
+          mcAnswered:false, mcSelected:null, mcAttempts:0, mcShowAnswer:false, quiz:newQuizState() },
+    s3: { quiz:newQuizState() },
+    s4: { quiz:newQuizState() },
+    summary: { revealed:[false,false], checklist:[false,false] }
+  };
+}
+var state = initialState();
+/* =========================================================================
+   LESSON-SPECIFIC-DATA-END
+   ========================================================================= */
+/* =========================================================================
+   APP-COMMON-HELPERS-START
+   全教材共通のヘルパー・制御関数（ベクトル版：LAP_KEY_PREFIXのみ変更）。
+   ========================================================================= */
+function frac(numHtml, denHtml){
+  return '<span class="frac"><span class="num">'+numHtml+'</span><span class="den">'+denHtml+'</span></span>';
+}
+function fmtNum(x){
+  if (typeof x === 'object' && x !== null && 'num' in x && 'den' in x) return frac(x.num, x.den);
+  return String(x);
+}
+function escAttr(s){ return String(s).replace(/"/g,'&quot;'); }
+function numOptions(correct, deltas){
+  var set = [correct];
+  deltas.forEach(function(d){
+    var v = correct + d;
+    if (v !== correct && set.indexOf(v) === -1) set.push(v);
+  });
+  set = set.slice(0,4);
+  set.sort(function(a,b){ return a-b; });
+  return set;
+}
+/* 周回数の記録。ベクトル版はキー接頭辞を変更（数列と混ざらないように） */
+var LAP_KEY_PREFIX = 'vector:lap:';
+function lapStorageKey(){
+  return LAP_KEY_PREFIX + (typeof LESSON_ID !== 'undefined' ? LESSON_ID : 'unknown');
+}
+function lapStorageAvailable(){
+  try { return typeof localStorage !== 'undefined' && localStorage !== null; }
+  catch(e){ return false; }
+}
+function readLapCount(){
+  if (!lapStorageAvailable()) return 0;
+  try {
+    var v = parseInt(localStorage.getItem(lapStorageKey()), 10);
+    return (isFinite(v) && v > 0) ? v : 0;
+  } catch(e){ return 0; }
+}
+function writeLapCount(n){
+  if (!lapStorageAvailable()) return n;
+  try { localStorage.setItem(lapStorageKey(), String(n)); } catch(e){}
+  return n;
+}
+function incrementLapCount(){
+  var n = readLapCount() + 1;
+  writeLapCount(n);
+  return n;
+}
+var lapCount = readLapCount();
+var lessonCompleted = false;
+function pickQuestion(pool, avoidId){
+  var candidates = pool;
+  if (pool.length > 1 && avoidId){
+    candidates = pool.filter(function(q){ return q.id !== avoidId; });
+  }
+  return candidates[Math.floor(Math.random()*candidates.length)];
+}
+function renderQuizBlock(pool, qState, answerAction, nextAction){
+  var q = pool.filter(function(p){ return p.id === qState.qid; })[0];
+  if (!q){ q = pickQuestion(pool, null); qState.qid = q.id; }
+  var base = answerAction.replace(/-answer$/, '');
+  var solved = qState.answered && qState.selected === q.correct;
+  var locked = solved || qState.showAnswer;
+  var html = '';
+  if (q.given) html += '<div class="quiz-given">'+q.given+'</div>';
+  html += '<div class="quiz-q">Q. '+q.ask+'</div>';
+  html += '<div class="quiz-options">';
+  q.options.forEach(function(opt){
+    var cls = 'btn sm';
+    if (locked){
+      if (opt === q.correct) cls += ' correct-ans';
+      else if (opt === qState.selected) cls += ' selected';
+    } else if (qState.answered && opt === qState.selected){
+      cls += ' selected';
+    }
+    html += '<button class="'+cls+'" data-action="'+answerAction+'" data-value="'+escAttr(opt)+'" '+(qState.answered?'disabled':'')+'>'+opt+'</button>';
+  });
+  html += '</div>';
+  if (solved){
+    html += '<div class="feedback ok"><b>正解です。</b>'+q.reason+'</div>';
+    html += '<div class="btn-row"><button class="btn" data-action="'+nextAction+'">別の問題にする</button></div>';
+  } else if (qState.showAnswer){
+    html += '<div class="feedback warn"><b>考え方を確認しましょう。</b>'+q.reason+'</div>';
+    html += '<div class="btn-row"><button class="btn" data-action="'+nextAction+'">別の問題にする</button></div>';
+  } else if (qState.answered){
+    var attempts = qState.attempts || 1;
+    var hints = q.hints || [];
+    var hint = hints[Math.min(attempts-1, hints.length-1)] || 'もう一度、問題文と選択肢を見比べてみましょう。';
+    html += '<div class="feedback warn"><b>答えと考え方を確認しましょう。</b>'+hint+'</div>';
+    html += '<div class="btn-row"><button class="btn" data-action="'+base+'-retry">もう一度考える</button>';
+    if (attempts >= 2){
+      html += '<button class="btn ghost" data-action="'+base+'-reveal">考え方を確認する</button>';
+    }
+    html += '</div>';
+  }
+  return html;
+}
+function mcDone(sub, key, correct){
+  return (sub[key+'Answered'] && sub[key+'Selected'] === correct) || sub[key+'ShowAnswer'];
+}
+function mcFeedback(sub, key, correct, hints, correctReason, actionBase){
+  if (!sub[key+'Answered']) return '';
+  var html = '';
+  if (sub[key+'Selected'] === correct){
+    html += '<div class="feedback ok"><b>その通りです。</b>'+correctReason+'</div>';
+  } else if (sub[key+'ShowAnswer']){
+    html += '<div class="feedback warn"><b>考え方を確認しましょう。</b>'+correctReason+'</div>';
+  } else {
+    var attempts = sub[key+'Attempts'] || 1;
+    var hint = hints[Math.min(attempts-1, hints.length-1)];
+    html += '<div class="feedback warn"><b>答えと考え方を確認しましょう。</b>'+hint+'</div>';
+    html += '<div class="btn-row"><button class="btn" data-action="'+actionBase+'-retry">もう一度考える</button>';
+    if (attempts >= 2){
+      html += '<button class="btn ghost" data-action="'+actionBase+'-reveal">考え方を確認する</button>';
+    }
+    html += '</div>';
+  }
+  return html;
+}
+function mcAnswer(sub, key, correct, val){
+  sub[key+'Selected'] = val; sub[key+'Answered'] = true;
+  if (val !== correct) sub[key+'Attempts'] = (sub[key+'Attempts']||0) + 1;
+}
+function mcRetry(sub, key){ sub[key+'Answered'] = false; sub[key+'Selected'] = null; }
+function mcReveal(sub, key){ sub[key+'Answered'] = true; sub[key+'ShowAnswer'] = true; }
+function handleQuizAnswer(sub, pool, val){
+  var q = pool.filter(function(p){ return p.id === sub.quiz.qid; })[0];
+  sub.quiz.selected = val; sub.quiz.answered = true;
+  if (!q || val !== q.correct) sub.quiz.attempts = (sub.quiz.attempts||0) + 1;
+  render();
+}
+function handleQuizRetry(sub){ sub.quiz.answered = false; sub.quiz.selected = null; render(); }
+function handleQuizReveal(sub){ sub.quiz.answered = true; sub.quiz.showAnswer = true; render(); }
+function handleQuizNext(sub, pool){
+  var q = pickQuestion(pool, sub.quiz.qid);
+  sub.quiz = { qid:q.id, selected:null, answered:false, attempts:0, showAnswer:false };
+  render();
+}
+function renderHeader(){
+  var key = STEPS[state.stepIndex];
+  var activeDot = DOT_INDEX[key];
+  var dotsHtml = '';
+  for (var i=0;i<DOT_LABELS.length;i++){
+    var cls = 'stage-dot' + (i===activeDot?' active':'') + (i<activeDot?' done':'');
+    dotsHtml += '<div class="'+cls+'"><div class="dot">'+DOT_LABELS[i]+'</div></div>';
+  }
+  var lapText = lessonCompleted ? (lapCount+'周目 完了') : ((lapCount+1)+'周目');
+  var html = '<p class="header-title"><span class="ht-text">'+document.title+'</span><span class="lap-badge">'+lapText+'</span></p>';
+  html += '<div class="stage-dots">'+dotsHtml+'</div>';
+  html += '<div class="stage-sub">'+STAGE_LABEL[key]+'：'+STAGE_SUBLABEL[key]+'</div>';
+  document.getElementById('app-header').innerHTML = html;
+}
+function summaryAllChecked(){
+  var cl = state.summary && state.summary.checklist;
+  return !!(cl && cl.length && cl.every(function(v){ return v === true; }));
+}
+function renderFooter(){
+  var isFirst = state.stepIndex === 0;
+  var isLast = state.stepIndex === STEPS.length-1;
+  var html = '';
+  html += '<button class="btn ghost" data-action="prev" '+(isFirst?'disabled':'')+'>← 前へ</button>';
+  html += '<button class="btn restart" data-action="restart">最初から</button>';
+  if (isLast){
+    var ready = summaryAllChecked() && !lessonCompleted;
+    html += '<button class="btn complete'+(lessonCompleted?' done':'')+'" data-action="complete" '+(ready?'':'disabled')+'>'+(lessonCompleted?'完了しました':'完了')+'</button>';
+  } else {
+    html += '<button class="btn primary" data-action="next">次へ →</button>';
+  }
+  document.getElementById('app-footer').innerHTML = html;
+}
+function handleComplete(){
+  if (lessonCompleted || !summaryAllChecked()) return;
+  lessonCompleted = true;
+  lapCount = incrementLapCount();
+  render();
+}
+function render(){
+  renderHeader();
+  var key = STEPS[state.stepIndex];
+  var main = document.getElementById('app-main');
+  var html = RENDERERS[key] ? RENDERERS[key]() : '';
+  if (state.navMsg){
+    html += '<div class="panel"><div class="feedback warn"><b>'+state.navMsg+'</b></div></div>';
+    state.navMsg = null;
+  }
+  main.innerHTML = html;
+  renderFooter();
+}
+function goNext(){
+  if (typeof stepGateMessage === 'function'){
+    var gateMsg = stepGateMessage();
+    if (gateMsg){ state.navMsg = gateMsg; render(); return; }
+  }
+  if (state.stepIndex < STEPS.length-1){ state.stepIndex++; render(); window.scrollTo(0,0); }
+}
+function goPrev(){ if (state.stepIndex > 0){ state.stepIndex--; render(); window.scrollTo(0,0); } }
+function restartAll(){ state = initialState(); lessonCompleted = false; render(); window.scrollTo(0,0); }
+/* =========================================================================
+   まとめ画面（3ブロック構成で固定）
+   ========================================================================= */
+function renderSummary(){
+  var s = state.summary;
+  var html = '';
+  html += '<div class="panel">';
+  html += '  <h2 class="stage-title">今日理解したこと</h2>';
+  html += '  <div class="flow-badge">'+flowBadgeInner()+'</div>';
+  html += '  <ul style="padding-left:20px;">';
+  SUMMARY_POINTS.forEach(function(p){ html += '<li style="margin-bottom:4px;">'+p+'</li>'; });
+  html += '  </ul>';
+  html += '</div>';
+  html += '<div class="panel">';
+  html += '  <h2 class="stage-title" style="font-size:1.05em;">自分の言葉で説明してみましょう</h2>';
+  SUMMARY_QA.forEach(function(qa, idx){
+    html += '<div style="margin-bottom:16px;padding-bottom:14px;'+(idx<SUMMARY_QA.length-1?'border-bottom:1px solid var(--border);':'')+'">';
+    html += '<div class="quiz-q">Q'+(idx+1)+'. '+qa.q+'</div>';
+    if (s.revealed[idx]){
+      html += '<div class="feedback ok"><b>正答に必要な要素</b><ul style="margin:4px 0 0;padding-left:18px;">';
+      qa.points.forEach(function(p){ html += '<li>'+p+'</li>'; });
+      html += '</ul></div>';
+    } else {
+      html += '<div class="btn-row"><button class="btn" data-action="summary-reveal" data-value="'+idx+'">答えを見る</button></div>';
+    }
+    html += '</div>';
+  });
+  html += '</div>';
+  html += '<div class="panel">';
+  html += '  <h2 class="stage-title" style="font-size:1.05em;">教科書へ戻る</h2>';
+  html += '  <p class="lead">'+TEXTBOOK_REF+'と、'+CHART_REF+'をもう一度読み、最初に分からなかった言葉や図を自分の言葉で説明してみましょう。</p>';
+  html += '  <div class="checklist">';
+  CHECKLIST_ITEMS.forEach(function(item, idx){
+    html += '<label class="check-item"><input type="checkbox" data-action="summary-check" data-value="'+idx+'" '+(s.checklist[idx]?'checked':'')+'>'+item+'</label>';
+  });
+  html += '  </div>';
+  html += '</div>';
+  return html;
+}
+function handleSummaryReveal(idx){ state.summary.revealed[Number(idx)] = true; render(); }
+function handleSummaryCheck(idx){
+  var i = Number(idx);
+  state.summary.checklist[i] = !state.summary.checklist[i];
+  render();
+}
+document.getElementById('app').addEventListener('click', function(e){
+  var el = e.target.closest('[data-action]');
+  if (!el || el.disabled) return;
+  if (el.tagName === 'INPUT' && el.type === 'checkbox') return;
+  handleAction(el.getAttribute('data-action'), el.getAttribute('data-value'), el);
+});
+document.getElementById('app').addEventListener('change', function(e){
+  var el = e.target;
+  if (el.tagName === 'INPUT' && el.type === 'checkbox' && el.hasAttribute('data-action')){
+    handleAction(el.getAttribute('data-action'), el.getAttribute('data-value'), el);
+  }
+});
+/* =========================================================================
+   APP-COMMON-HELPERS-END
+   ========================================================================= */
+/* =========================================================================
+   LESSON-SPECIFIC-RENDERERS-START
+   ========================================================================= */
+var SVG_OX = 44, SVG_OY = 200, SVG_U = 26;
+var SVG_W = 300, SVG_H = 230;
+function sx(mx){ return SVG_OX + mx*SVG_U; }
+function sy(my){ return SVG_OY - my*SVG_U; }
+var SVG_COLORS = { blue:'var(--n-color)', green:'var(--an-color)', purple:'var(--rule-color)' };
+function svgGridAxis(){
+  var g = '';
+  var i;
+  for (i=0;i<=8;i++){ g += '<line class="grid-line" x1="'+sx(i)+'" y1="'+sy(0)+'" x2="'+sx(i)+'" y2="'+sy(7)+'"/>'; }
+  for (i=0;i<=7;i++){ g += '<line class="grid-line" x1="'+sx(0)+'" y1="'+sy(i)+'" x2="'+sx(8)+'" y2="'+sy(i)+'"/>'; }
+  g += '<line class="axis-line" x1="'+sx(0)+'" y1="'+sy(0)+'" x2="'+sx(8)+'" y2="'+sy(0)+'"/>';
+  g += '<line class="axis-line" x1="'+sx(0)+'" y1="'+sy(0)+'" x2="'+sx(0)+'" y2="'+sy(7)+'"/>';
+  g += '<text class="axis-label" x="'+(sx(8)-2)+'" y="'+(sy(0)+14)+'">x</text>';
+  g += '<text class="axis-label" x="'+(sx(0)-14)+'" y="'+(sy(7)+4)+'">y</text>';
+  g += '<text class="axis-label" x="'+(sx(0)-12)+'" y="'+(sy(0)+14)+'">O</text>';
+  return g;
+}
+/* 矢印の先端。markerUnits="userSpaceOnUse" にして、線の太さに関係なく
+   一定の大きさ（12px）にする。こうしないと線の太さの倍率で拡大され、
+   短い矢印では先端だけが大きく見えてしまう。 */
+function svgMarkers(idp){
+  var m = '';
+  ['blue','green','purple'].forEach(function(c){
+    m += '<marker id="'+idp+'-'+c+'" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">'
+       + '<path d="M0,0 L12,6 L0,12 z" fill="'+SVG_COLORS[c]+'"/></marker>';
+  });
+  return m;
+}
+/* 矢印1本。side に −1 を指定するとラベルを線の反対側へ出す
+   （2本が重なる図で、両方のラベルを重ねずに表示するために使う）。 */
+function svgArrow(idp, color, mx1, my1, mx2, my2, label, dashed, side){
+  var x1=sx(mx1), y1=sy(my1), x2=sx(mx2), y2=sy(my2);
+  var dash = dashed ? ' stroke-dasharray="5 4"' : '';
+  var s = '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+SVG_COLORS[color]+'" stroke-width="2.6" stroke-linecap="round" marker-end="url(#'+idp+'-'+color+')"'+dash+'/>';
+  if (label){
+    var dx = x2-x1, dy = y2-y1;
+    var L = Math.sqrt(dx*dx + dy*dy) || 1;
+    var px = -dy/L, py = dx/L;
+    if (px > 0){ px = -px; py = -py; }
+    if (side === -1){ px = -px; py = -py; }
+    var OFF = 12;
+    var lx = (x1+x2)/2 + px*OFF, ly = (y1+y2)/2 + py*OFF + 5;
+    s += '<text class="vlabel '+color+'" x="'+lx+'" y="'+ly+'" text-anchor="middle">'+label+'</text>';
+  }
+  return s;
+}
+function buildSvg(idp, arrows, extras){
+  var s = '<div class="vec-svg-wrap"><svg class="vec-svg" viewBox="0 0 '+SVG_W+' '+SVG_H+'" role="img">';
+  s += '<defs>'+svgMarkers(idp)+'</defs>';
+  s += svgGridAxis();
+  if (extras) s += extras;
+  arrows.forEach(function(a){
+    s += svgArrow(idp, a.c, a.x1, a.y1, a.x2, a.y2, a.label, a.dashed, a.side);
+  });
+  s += '</svg></div>';
+  return s;
+}
+function vecLegend(items){
+  var s = '<div class="vec-legend">';
+  items.forEach(function(it){
+    s += '<span class="lg '+it.c+'"><span class="swatch" style="border-color:'+SVG_COLORS[it.c]+'"></span>'+it.t+'</span>';
+  });
+  s += '</div>';
+  return s;
+}
+/* 点を打つ（06専用の追加ヘルパー）。dir でラベルを出す向きを選べる
+   （矢印や他の点のラベルと重ならない側へ逃がすため。08のpointDotの平面版）。 */
+function svgDot(mx, my, label, dir, color){
+  var c = color || 'blue';
+  var px = sx(mx), py = sy(my);
+  var s = '<circle class="pt-dot'+(c==='green'?' green':(c==='purple'?' purple':''))+'" cx="'+px+'" cy="'+py+'" r="4"/>';
+  if (label){
+    var ox=14, oy=-10, anchor='start';
+    if (dir==='lb'){ ox=-13; oy=16; anchor='end'; }
+    else if (dir==='lt'){ ox=-13; oy=-9; anchor='end'; }
+    else if (dir==='rb'){ ox=14; oy=17; anchor='start'; }
+    s += '<text class="vlabel '+c+'" x="'+(px+ox)+'" y="'+(py+oy)+'" text-anchor="'+anchor+'">'+label+'</text>';
+  }
+  return s;
+}
+/* s1・s2 共通の基準点：A=(1,4)、B=(7,2)。内分点Pの位置は比によって決まる。 */
+var PV_A = [1, 4];
+var PV_B = [7, 2];
+function pvPoint(ratioState){
+  /* AP:PB=1:2 なら p=(2a+b)/3、2:1 なら p=(a+2b)/3 */
+  var m, n;
+  if (ratioState === '1:2'){ m=1; n=2; } else { m=2; n=1; }
+  return [ (n*PV_A[0]+m*PV_B[0])/(m+n), (n*PV_A[1]+m*PV_B[1])/(m+n) ];
+}
+function renderStage1(){
+  var html = '';
+  html += '<div class="panel">';
+  html += '  <h2 class="stage-title">点を矢印で表す</h2>';
+  html += '  <p class="stage-goal">基準になる点Oを1つ決めると、他のどんな点も「Oからその点までの矢印」で表せます。この矢印を位置ベクトルといいます。</p>';
+  html += '  <div class="flow-badge">'+flowBadgeInner()+'</div>';
+  html += '  <p class="lead">点Aの位置ベクトルを a=OA↑、点Bの位置ベクトルを b=OB↑ とします。点Aから点Bへ向かう矢印 AB↑ は、a と b を使ってどう表せるでしょうか。</p>';
+  var extras = svgDot(PV_A[0], PV_A[1], 'A', 'lt', 'blue') + svgDot(PV_B[0], PV_B[1], 'B', 'rt', 'green');
+  html += buildSvg('s1', [
+    {c:'blue', x1:0, y1:0, x2:PV_A[0], y2:PV_A[1], label:'a'},
+    {c:'green', x1:0, y1:0, x2:PV_B[0], y2:PV_B[1], label:'b', side:-1},
+    {c:'purple', x1:PV_A[0], y1:PV_A[1], x2:PV_B[0], y2:PV_B[1], label:'b−a'}
+  ], extras);
+  html += vecLegend([{c:'blue',t:'a=OA↑'},{c:'green',t:'b=OB↑'},{c:'purple',t:'AB↑=b−a'}]);
+  html += '  <p class="lead">AB↑ は「Aの位置からBの位置までの移動」なので、AB↑=(Bの位置ベクトル)−(Aの位置ベクトル)=b−a です。02で学んだ「引き算＝(終点)−(始点)」の考え方が、位置ベクトルでもそのまま使えます。</p>';
+  html += '</div>';
+  html += '<div class="panel">';
+  html += '  <h2 class="stage-title" style="font-size:1.05em;">確認問題</h2>';
+  html += renderQuizBlock(s1QuizPool(), state.s1.quiz, 's1-quiz-answer', 's1-quiz-next');
+  html += '</div>';
+  return html;
+}
+function handleS1QuizAnswer(val){ handleQuizAnswer(state.s1, s1QuizPool(), val); }
+function handleS1QuizRetry(){ handleQuizRetry(state.s1); }
+function handleS1QuizReveal(){ handleQuizReveal(state.s1); }
+function handleS1QuizNext(){ handleQuizNext(state.s1, s1QuizPool()); }
+/* ---- ステージ2：内分点の比を 1:2 ⇄ 2:1 で何度でも切り替えられる ---- */
+function renderStage2(){
+  var s = state.s2;
+  var html = '';
+  html += '<div class="panel">';
+  html += '  <h2 class="stage-title">内分点を式で表す</h2>';
+  html += '  <p class="stage-goal">線分AB上に、比を変えて点Pを取ります。a、b の大きさや向きは変えず、AP:PBの比だけを 1:2 ⇄ 2:1 と切り替えて、Pの位置がどう動くか見ます。</p>';
+  html += '  <div class="flow-badge">'+flowBadgeInner()+'</div>';
+  var P = pvPoint(s.ratioState);
+  var pDir = s.ratioState === '1:2' ? 'rb' : 'rt';
+  var extras = svgDot(PV_A[0], PV_A[1], 'A', 'lt', 'blue')
+    + svgDot(PV_B[0], PV_B[1], 'B', 'rt', 'green')
+    + '<line class="helper-line" x1="'+sx(PV_A[0])+'" y1="'+sy(PV_A[1])+'" x2="'+sx(PV_B[0])+'" y2="'+sy(PV_B[1])+'"/>'
+    + svgDot(P[0], P[1], 'P', pDir, 'purple');
+  html += buildSvg('s2', [
+    {c:'blue', x1:0, y1:0, x2:PV_A[0], y2:PV_A[1], label:'a'},
+    {c:'green', x1:0, y1:0, x2:PV_B[0], y2:PV_B[1], label:'b', side:-1},
+    {c:'purple', x1:0, y1:0, x2:P[0], y2:P[1], label:'p', side:-1}
+  ], extras);
+  html += vecLegend([{c:'blue',t:'a=OA↑'},{c:'green',t:'b=OB↑'},{c:'purple',t:'p=OP↑（AP:PB='+s.ratioState+'）'}]);
+  if (s.ratioState === '1:2'){
+    html += '  <p class="lead">今は AP:PB=1:2 です。点Pは点Aに近い位置にあります。比を切り替えると、Pの位置はどう変わるでしょうか。</p>';
+  } else {
+    html += '  <p class="lead">今は AP:PB=2:1 です。点Pは点Bに近い位置に動きました。比の大小と、Pがどちらに近づくかを見比べましょう。</p>';
+  }
+  html += '  <div class="btn-row">';
+  html += '<button class="btn primary" data-action="s2-toggle-ratio">'
+        + (s.ratioState === '1:2' ? '比を2:1に切り替える' : '比を1:2に戻す') + '</button>';
+  html += '  </div>';
+  html += '  <div class="toggle-state"><span class="now">今の状態：AP:PB='
+        + s.ratioState + '</span>'
+        + '<span>切り替えた回数：'+s.ratioCount+' 回</span>'
+        + '<span>何度でも切り替えて見比べられます。</span></div>';
+  if (s.ratioEverSwapped){
+    html += '  <p class="lead" style="margin-top:14px;">Q. 線分ABを 1:2 に内分する点Pの位置ベクトル p を a、b で表すとどうなりますか。</p>';
+    html += '  <div class="btn-row">';
+    (function(){
+      var locked = mcDone(s, 'mc', S2_MC_CORRECT);
+      S2_MC_OPTIONS.forEach(function(opt){
+        var cls = 'btn';
+        if (locked){
+          if (opt === S2_MC_CORRECT) cls += ' correct-ans';
+          else if (opt === s.mcSelected) cls += ' selected';
+        } else if (s.mcAnswered && opt === s.mcSelected){
+          cls += ' selected';
+        }
+        html += '<button class="'+cls+'" data-action="s2-mc-answer" data-value="'+escAttr(opt)+'" '+(s.mcAnswered?'disabled':'')+'>'+opt+'</button>';
+      });
+    })();
+    html += '  </div>';
+    html += mcFeedback(s, 'mc', S2_MC_CORRECT,
+      ['1:2 という比の、どちらの数字が a に、どちらが b にかかるか図と見比べましょう。',
+       'Aから近い側の比（1）ではなく、反対側の比（2）が a にかかります（たすき掛け）。'],
+      'AP:PB=1:2 のとき p=(2a+b)/3 です。比の数字は「反対側」にかかる、たすき掛けの関係になっています。', 's2-mc');
+  }
+  html += '</div>';
+  if (s.ratioEverSwapped && mcDone(s, 'mc', S2_MC_CORRECT)){
+    html += '<div class="panel">';
+    html += '  <h2 class="stage-title" style="font-size:1.05em;">内分点の公式</h2>';
+    html += '  <p class="lead">線分ABを m:n に内分する点の位置ベクトルは p=(na+mb)/(m+n) です。比を入れかえると、係数も入れかわります。</p>';
+    html += '<div class="fix-change">';
+    html += '  <div class="fc-box fixed"><span class="fc-label">AP:PB=1:2</span><div class="fc-val">p=(2a+b)/3</div></div>';
+    html += '  <div class="fc-box change"><span class="fc-label">AP:PB=2:1</span><div class="fc-val">p=(a+2b)/3</div></div>';
+    html += '  <div class="fc-box result"><span class="fc-label">公式</span><div class="fc-val">p=(na+mb)/(m+n)</div></div>';
+    html += '</div>';
+    html += '</div>';
+    html += '<div class="panel">';
+    html += '  <h2 class="stage-title" style="font-size:1.05em;">確認問題</h2>';
+    html += renderQuizBlock(s2QuizPool(), state.s2.quiz, 's2-quiz-answer', 's2-quiz-next');
+    html += '</div>';
+  }
+  return html;
+}
+function handleS2ToggleRatio(){
+  var s = state.s2;
+  s.ratioState = (s.ratioState === '1:2') ? '2:1' : '1:2';
+  s.ratioCount = s.ratioCount + 1;
+  if (s.ratioState === '2:1') s.ratioEverSwapped = true;
+  render();
+}
+function handleS2McAnswer(val){ mcAnswer(state.s2, 'mc', S2_MC_CORRECT, val); render(); }
+function handleS2McRetry(){ mcRetry(state.s2, 'mc'); render(); }
+function handleS2McReveal(){ mcReveal(state.s2, 'mc'); render(); }
+function handleS2QuizAnswer(val){ handleQuizAnswer(state.s2, s2QuizPool(), val); }
+function handleS2QuizRetry(){ handleQuizRetry(state.s2); }
+function handleS2QuizReveal(){ handleQuizReveal(state.s2); }
+function handleS2QuizNext(){ handleQuizNext(state.s2, s2QuizPool()); }
+function renderStage3(){
+  var html = '';
+  html += '<div class="panel">';
+  html += '  <h2 class="stage-title">中点と外分点</h2>';
+  html += '  <p class="stage-goal">中点は内分の特別な場合（1:1）です。外分点は、線分ABの延長線上にできる点で、内分点の公式の符号を1つ変えるだけで求められます。</p>';
+  html += '  <div class="flow-badge">'+flowBadgeInner()+'</div>';
+  var A = [1, 3], B = [4, 4], M = [2.5, 3.5], Q = [7, 5];
+  var extras = svgDot(A[0], A[1], 'A', 'lb', 'blue')
+    + svgDot(B[0], B[1], 'B', 'rt', 'green')
+    + '<line class="helper-line" x1="'+sx(A[0])+'" y1="'+sy(A[1])+'" x2="'+sx(Q[0])+'" y2="'+sy(Q[1])+'"/>'
+    + svgDot(M[0], M[1], 'M', 'lb', 'purple')
+    + svgDot(Q[0], Q[1], 'Q', 'rt', 'purple');
+  html += buildSvg('s3', [
+    {c:'purple', x1:0, y1:0, x2:Q[0], y2:Q[1], label:'q', side:-1}
+  ], extras);
+  html += vecLegend([{c:'blue',t:'A'},{c:'green',t:'B'},{c:'purple',t:'M：中点／Q：2:1の外分点'}]);
+  html += '  <p class="lead">中点Mの位置ベクトルは (a+b)/2 です（1:1に内分する場合と同じ式）。外分点Qは、内分点の公式 p=(na+mb)/(m+n) の n を −n にして、q=(−a+2b)/(2−1)=−a+2b で求まります。</p>';
+  html += '<table class="terms"><tr><th>点</th><th>位置ベクトル</th><th>意味</th></tr>';
+  html += '<tr><td>中点M</td><td>(a+b)/2</td><td>1:1に内分する点</td></tr>';
+  html += '<tr><td>外分点Q（2:1）</td><td>−a+2b</td><td>ABの延長線上の点</td></tr>';
+  html += '</table>';
+  html += '</div>';
+  html += '<div class="panel">';
+  html += '  <h2 class="stage-title" style="font-size:1.05em;">確認問題</h2>';
+  html += renderQuizBlock(s3QuizPool(), state.s3.quiz, 's3-quiz-answer', 's3-quiz-next');
+  html += '</div>';
+  return html;
+}
+function handleS3QuizAnswer(val){ handleQuizAnswer(state.s3, s3QuizPool(), val); }
+function handleS3QuizRetry(){ handleQuizRetry(state.s3); }
+function handleS3QuizReveal(){ handleQuizReveal(state.s3); }
+function handleS3QuizNext(){ handleQuizNext(state.s3, s3QuizPool()); }
+function renderStage4(){
+  var html = '';
+  html += '<div class="panel">';
+  html += '  <h2 class="stage-title">3点の重心</h2>';
+  html += '  <p class="stage-goal">三角形ABCの3つの頂点の位置ベクトルの平均を取ると、重心Gの位置ベクトルになります。</p>';
+  html += '  <div class="flow-badge">'+flowBadgeInner()+'</div>';
+  var A = [0.5, 1.5], B = [7, 1], C = [4.5, 5], G = [4, 2.5], M = [3.75, 1.25];
+  var extras = svgDot(A[0], A[1], 'A', 'lb', 'blue')
+    + svgDot(B[0], B[1], 'B', 'rb', 'blue')
+    + svgDot(C[0], C[1], 'C', 'lt', 'green')
+    + '<line class="helper-line" x1="'+sx(A[0])+'" y1="'+sy(A[1])+'" x2="'+sx(B[0])+'" y2="'+sy(B[1])+'"/>'
+    + '<line class="helper-line" x1="'+sx(B[0])+'" y1="'+sy(B[1])+'" x2="'+sx(C[0])+'" y2="'+sy(C[1])+'"/>'
+    + '<line class="helper-line" x1="'+sx(C[0])+'" y1="'+sy(C[1])+'" x2="'+sx(A[0])+'" y2="'+sy(A[1])+'"/>'
+    + '<line class="helper-line" x1="'+sx(C[0])+'" y1="'+sy(C[1])+'" x2="'+sx(M[0])+'" y2="'+sy(M[1])+'"/>'
+    + svgDot(M[0], M[1], 'M', 'rb', 'purple')
+    + svgDot(G[0], G[1], 'G', 'rt', 'purple');
+  html += buildSvg('s4', [
+    {c:'purple', x1:0, y1:0, x2:G[0], y2:G[1], label:'g', side:-1}
+  ], extras);
+  html += vecLegend([{c:'blue',t:'A・B'},{c:'green',t:'C'},{c:'purple',t:'M：辺ABの中点／G：重心'}]);
+  html += '  <p class="lead">重心Gの位置ベクトルは g=(a+b+c)/3 です。Gは、頂点Cから辺ABの中点Mまでの中線CM上にもあり、CG:GM=2:1（Cに近い方が2）に内分する点になっています。</p>';
+  html += '</div>';
+  html += '<div class="panel">';
+  html += '  <h2 class="stage-title" style="font-size:1.05em;">確認問題</h2>';
+  html += renderQuizBlock(s4QuizPool(), state.s4.quiz, 's4-quiz-answer', 's4-quiz-next');
+  html += '</div>';
+  return html;
+}
+function handleS4QuizAnswer(val){ handleQuizAnswer(state.s4, s4QuizPool(), val); }
+function handleS4QuizRetry(){ handleQuizRetry(state.s4); }
+function handleS4QuizReveal(){ handleQuizReveal(state.s4); }
+function handleS4QuizNext(){ handleQuizNext(state.s4, s4QuizPool()); }
+function stepGateMessage(){
+  var key = STEPS[state.stepIndex];
+  if (key === 's2' && !(state.s2.ratioEverSwapped && mcDone(state.s2, 'mc', S2_MC_CORRECT))){
+    return 'このステージには、まだ確認していない内容があります。先に現在の問題を進めましょう。';
+  }
+  return null;
+}
+var RENDERERS = {
+  s1: renderStage1,
+  s2: renderStage2,
+  s3: renderStage3,
+  s4: renderStage4,
+  summary: renderSummary
+};
+function handleAction(action, value, el){
+  switch(action){
+    case 'next': goNext(); break;
+    case 'prev': goPrev(); break;
+    case 'restart': restartAll(); break;
+    case 'complete': handleComplete(); break;
+    case 's1-quiz-answer': handleS1QuizAnswer(value); break;
+    case 's1-quiz-retry': handleS1QuizRetry(); break;
+    case 's1-quiz-reveal': handleS1QuizReveal(); break;
+    case 's1-quiz-next': handleS1QuizNext(); break;
+    case 's2-toggle-ratio': handleS2ToggleRatio(); break;
+    case 's2-mc-answer': handleS2McAnswer(value); break;
+    case 's2-mc-retry': handleS2McRetry(); break;
+    case 's2-mc-reveal': handleS2McReveal(); break;
+    case 's2-quiz-answer': handleS2QuizAnswer(value); break;
+    case 's2-quiz-retry': handleS2QuizRetry(); break;
+    case 's2-quiz-reveal': handleS2QuizReveal(); break;
+    case 's2-quiz-next': handleS2QuizNext(); break;
+    case 's3-quiz-answer': handleS3QuizAnswer(value); break;
+    case 's3-quiz-retry': handleS3QuizRetry(); break;
+    case 's3-quiz-reveal': handleS3QuizReveal(); break;
+    case 's3-quiz-next': handleS3QuizNext(); break;
+    case 's4-quiz-answer': handleS4QuizAnswer(value); break;
+    case 's4-quiz-retry': handleS4QuizRetry(); break;
+    case 's4-quiz-reveal': handleS4QuizReveal(); break;
+    case 's4-quiz-next': handleS4QuizNext(); break;
+    case 'summary-reveal': handleSummaryReveal(value); break;
+    case 'summary-check': handleSummaryCheck(value); break;
+  }
+}
+/* =========================================================================
+   LESSON-SPECIFIC-RENDERERS-END
+   ========================================================================= */
+/* ---------- 初期表示 ---------- */
+render();
+</script>
+</body>
+</html>

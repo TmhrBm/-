@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>ベクトルの内積 ー 体験教材</title>
+<style>
+/* =========================================================================
+   APP-COMMON-CSS-START
+   ========================================================================= */
+:root{
+  --n-color:#1d4ed8;
+  --n-bg:#e5edfc;
+  --an-color:#0f7a3d;
+  --an-bg:#e2f5e9;
+  --rule-color:#be185d;
+  --rule-bg:#fce7f3;
+  --correct:#178a43;
+  --correct-bg:#e5f7ec;
+  --caution:#c65a12;
+  --caution-bg:#fdf0e4;
+  --bg:#f6f7fa;
+  --card:#ffffff;
+  --border:#dfe3ea;
+  --text:#20242c;
+  --text-soft:#666f7d;
+  --radius:14px;
+  --radius-sm:8px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic Medium","Yu Gothic","Meiryo",system-ui,-apple-system,sans-serif;
+  line-height:1.75;
+  font-size:16px;
+  -webkit-font-smoothing:antialiased;
+}
+#app{max-width:840px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;}
+button{font-family:inherit;cursor:pointer;}
+button:focus-visible, input:focus-visible{outline:3px solid #93b4f7;outline-offset:2px;}
+input[type=number]{font-family:inherit;font-size:1.05em;}
+#app-header{
+  padding:14px 18px 10px;
+  background:var(--card);
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:10;
+}
+.header-title{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.82em;color:var(--text-soft);margin:0 0 8px;letter-spacing:.02em;}
+.header-title .ht-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.lap-badge{background:var(--an-bg);color:var(--an-color);border-radius:999px;padding:2px 10px;font-size:.9em;font-weight:700;white-space:nowrap;flex:0 0 auto;}
+.stage-dots{display:flex;align-items:center;gap:6px;}
+.stage-dot{
+  flex:1;
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  font-size:.72em;color:var(--text-soft);
+}
+.stage-dot .dot{
+  width:26px;height:26px;border-radius:50%;
+  background:#eceff3;border:2px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:.9em;color:var(--text-soft);
+  transition:all .2s;
+}
+.stage-dot.active .dot{background:var(--n-color);border-color:var(--n-color);color:#fff;}
+.stage-dot.done .dot{background:var(--an-bg);border-color:var(--an-color);color:var(--an-color);}
+.stage-dot.active{color:var(--n-color);font-weight:700;}
+.stage-sub{font-size:.78em;color:var(--text-soft);margin-top:6px;}
+#app-main{flex:1;padding:18px 18px 30px;}
+.panel{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:18px;
+  margin-bottom:16px;
+}
+h2.stage-title{font-size:1.25em;margin:0 0 6px;}
+p.stage-goal{color:var(--text-soft);font-size:.92em;margin:0 0 14px;}
+p.lead{margin:0 0 12px;font-size:.97em;}
+.small-note{font-size:.85em;color:var(--text-soft);margin-top:8px;}
+.chip{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:3px 10px;border-radius:999px;font-size:.88em;font-weight:700;
+}
+.chip-n{background:var(--n-bg);color:var(--n-color);}
+.chip-an{background:var(--an-bg);color:var(--an-color);}
+.chip-rule{background:var(--rule-bg);color:var(--rule-color);}
+.seq-row{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin:14px 0;}
+.term-card{
+  border:2px solid var(--border);background:var(--card);
+  border-radius:10px;padding:8px 4px 10px;min-width:58px;text-align:center;
+  cursor:default;
+}
+.term-card .n-label{color:var(--n-color);font-size:.76em;font-weight:700;}
+.term-card .val{font-size:1.25em;font-weight:800;color:var(--text);margin-top:2px;}
+.term-card.dots{cursor:default;border-style:dashed;color:var(--text-soft);}
+.btn-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;}
+.btn{
+  border:2px solid var(--border);background:#fff;color:var(--text);
+  padding:9px 16px;border-radius:10px;font-size:.95em;font-weight:700;
+}
+.btn:hover{border-color:var(--n-color);}
+.btn.primary{background:var(--n-color);border-color:var(--n-color);color:#fff;}
+.btn.primary:hover{background:#1a44b8;}
+.btn.ghost{background:transparent;}
+.btn.selected{border-color:var(--rule-color);background:var(--rule-bg);color:var(--rule-color);}
+.btn.correct-ans{border-color:var(--correct);background:var(--correct-bg);color:var(--correct);}
+.btn:disabled{opacity:.45;cursor:not-allowed;}
+.btn.sm{padding:6px 12px;font-size:.85em;}
+.btn.complete{background:var(--correct);border-color:var(--correct);color:#fff;}
+.btn.complete:hover{background:#0f6b34;}
+.btn.complete.done{background:var(--correct-bg);color:var(--correct);}
+.feedback{border-radius:10px;padding:12px 14px;margin-top:12px;font-size:.94em;}
+.feedback.ok{background:var(--correct-bg);color:var(--correct);border:1.5px solid var(--correct);}
+.feedback.warn{background:var(--caution-bg);color:var(--caution);border:1.5px solid var(--caution);}
+.feedback b{display:block;margin-bottom:2px;font-size:1.02em;}
+.frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 3px;font-size:.92em;line-height:1.15;}
+.frac .num{padding:0 5px 2px;border-bottom:2px solid currentColor;}
+.frac .den{padding:2px 5px 0;}
+.math-lg{font-size:1.35em;font-weight:700;}
+.fix-change{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:14px;}
+.fc-box{border-radius:10px;padding:10px;text-align:center;font-size:.85em;}
+.fc-box .fc-label{font-weight:700;margin-bottom:4px;display:block;}
+.fc-box.fixed{background:var(--rule-bg);color:var(--rule-color);}
+.fc-box.change{background:var(--n-bg);color:var(--n-color);}
+.fc-box.result{background:var(--an-bg);color:var(--an-color);}
+.fc-box .fc-val{font-weight:800;font-size:1.1em;margin-top:2px;}
+.step-flow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:14px 0;}
+.step-box{
+  border:2px solid var(--border);border-radius:10px;padding:10px 14px;text-align:center;min-width:80px;background:#fff;
+}
+.step-box .step-label{font-size:.75em;color:var(--text-soft);margin-bottom:3px;}
+.step-arrow{color:var(--text-soft);font-size:1.3em;}
+.flow-vert{display:flex;flex-direction:column;gap:8px;margin:14px 0;}
+.flow-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.flow-arrow-down{color:var(--text-soft);font-size:1.2em;padding-left:6px;}
+.flow-result{border:2px solid var(--rule-color);background:var(--rule-bg);border-radius:10px;padding:12px 16px;text-align:center;color:var(--rule-color);font-weight:800;}
+.flow-badge{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:0 0 10px;}
+.flow-badge .arrow{color:var(--text-soft);font-size:.9em;}
+table.verify{width:100%;border-collapse:collapse;margin-top:12px;font-size:.92em;}
+table.verify th,table.verify td{border:1px solid var(--border);padding:7px 8px;text-align:center;}
+table.verify th{background:#f2f4f8;color:var(--text-soft);font-weight:700;}
+table.verify td.mark-ok{color:var(--correct);font-weight:800;}
+table.verify td.mark-ng{color:var(--caution);font-weight:800;}
+.check-item{display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid var(--border);font-size:.95em;}
+.check-item:last-child{border-bottom:none;}
+.check-item input{width:19px;height:19px;accent-color:var(--an-color);}
+.quiz-given{background:#f7f9fc;border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:10px;font-size:.92em;}
+.quiz-q{font-weight:700;margin-bottom:10px;}
+.quiz-options{display:flex;flex-wrap:wrap;gap:8px;}
+#app-footer{
+  position:sticky;bottom:0;background:var(--card);border-top:1px solid var(--border);
+  padding:12px 18px;display:flex;gap:10px;justify-content:space-between;
+}
+#app-footer .btn{flex:1;text-align:center;}
+#app-footer .btn.restart{flex:0 0 auto;}
+@media (max-width:520px){
+  .fix-change{grid-template-columns:1fr;}
+  #app-main{padding:14px 12px 24px;}
+  .panel{padding:14px;}
+  .stage-dot{font-size:.62em;}
+  .stage-dot .dot{width:22px;height:22px;font-size:.8em;}
+}
+@media print{
+  #app-footer, .btn, .quiz-options, input{display:none !important;}
+  #app-header{position:static;}
+  body{background:#fff;}
+  .lap-badge{display:none !important;}
+}
+/* =========================================================================
+   APP-COMMON-CSS-END
+   ========================================================================= */
+/* =========================================================================
+   LESSON-SPECIFIC-CSS-START
+   ベクトル教材固有：矢印図SVG（.vec-svg）と用語対応表。
+   ========================================================================= */
+.vec-svg-wrap{display:flex;justify-content:center;margin:14px 0 6px;}
+.vec-svg{width:100%;max-width:360px;height:auto;background:#fbfcfe;border:1px solid var(--border);border-radius:10px;}
+.vec-svg .grid-line{stroke:#e3e7ee;stroke-width:1;}
+.vec-svg .axis-line{stroke:#b7bfcc;stroke-width:1.5;}
+.vec-svg .axis-label{fill:var(--text-soft);font-size:11px;font-weight:700;}
+.vec-svg .vlabel{font-size:14px;font-weight:800;paint-order:stroke;stroke:#fbfcfe;stroke-width:3.5px;stroke-linejoin:round;}
+.vec-svg .vlabel.blue{fill:var(--n-color);}
+.vec-svg .vlabel.green{fill:var(--an-color);}
+.vec-svg .vlabel.purple{fill:var(--rule-color);}
+.vec-svg .helper-line{stroke:var(--text-soft);stroke-width:1.3;stroke-dasharray:4 3;}
+.vec-svg .helper-label{fill:var(--text-soft);font-size:11px;font-weight:700;paint-order:stroke;stroke:#fbfcfe;stroke-width:3px;stroke-linejoin:round;}
+.vec-svg .zero-dot{fill:var(--rule-color);}
+.vec-svg .angle-arc{fill:none;stroke:var(--rule-color);stroke-width:1.5;}
+.vec-legend{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:4px;font-size:.82em;}
+.vec-legend .lg{display:inline-flex;align-items:center;gap:5px;font-weight:700;}
+.vec-legend .swatch{width:22px;height:0;border-top:3px solid;border-radius:2px;}
+.vec-legend .lg.blue{color:var(--n-color);}
+.vec-legend .lg.green{color:var(--an-color);}
+.vec-legend .lg.purple{color:var(--rule-color);}
+/* 切り替え操作の状態表示（何回切り替えたか・今どちらの状態か） */
+.toggle-state{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px;font-size:.85em;color:var(--text-soft);}
+.toggle-state .now{background:var(--n-bg);color:var(--n-color);border-radius:999px;padding:2px 10px;font-weight:700;}
+table.terms{width:100%;border-collapse:collapse;margin:12px 0;font-size:.92em;}
+table.terms th,table.terms td{border:1px solid var(--border);padding:8px;text-align:center;}
+table.terms th{background:#f2f4f8;color:var(--text-soft);font-weight:700;}
+/* =========================================================================
+   LESSON-SPECIFIC-CSS-END
+   ========================================================================= */
+</style>
+</head>
+<body>
+<div id="app">
+  <header id="app-header"></header>
+  <main id="app-main"></main>
+  <footer id="app-footer"></footer>
+</div>
+<script>
+'use strict';
+/* =========================================================================
+   LESSON-SPECIFIC-DATA-START
+   ========================================================================= */
+var LESSON_ID = '05';
+var TEXTBOOK_REF = '教科書 p.21〜27（ベクトルの内積）';
+var CHART_REF = '黄チャート p.509〜519（基本事項・CHECK）';
+var STEPS = ['s1', 's2', 's3', 's4', 'summary'];
+var STAGE_LABEL = { s1:'ステージ1', s2:'ステージ2', s3:'ステージ3', s4:'ステージ4', summary:'まとめ' };
+var STAGE_SUBLABEL = {
+  s1:'2本から1つの数を作る',
+  s2:'角度で符号が変わるか調べる',
+  s3:'成分で内積を計算する',
+  s4:'垂直かどうかを判断する',
+  summary:'今日の理解を確認する'
+};
+var DOT_INDEX = { s1:0, s2:1, s3:2, s4:3, summary:4 };
+var DOT_LABELS = ['1', '2', '3', '4', 'まとめ'];
+function flowBadgeInner(){
+  return '<span class="chip chip-n">2本のベクトル</span><span class="arrow">→</span>'
+       + '<span class="chip chip-an">内積という数</span><span class="arrow">→</span>'
+       + '<span class="chip chip-rule">なす角と符号</span>';
+}
+function newQuizState(){ return { qid:null, selected:null, answered:false, attempts:0, showAnswer:false }; }
+function s1QuizPool(){
+  return [
+    { id:'notvec', ask:'内積の結果を「大きさと向きを持つ量」として扱うのは正しいですか。',
+      correct:'正しくない（内積は向きを持たない数である）',
+      options:['正しくない（内積は向きを持たない数である）','正しい（ベクトルとして扱ってよい）','大きさがあるので半分正しい'],
+      hints:['内積の計算結果が、矢印になるか、ただの数になるか考えましょう。',
+        'a·b=|a||b|cosθ の右辺は、すべて数どうしのかけ算です。'],
+      reason:'内積 a·b は、大きさどうしと cosθ をかけた「数（スカラー）」です。向きは持たないので、ベクトルとして扱うのは正しくありません。' },
+    { id:'formula-basic', ask:'|a|=4、|b|=5、a と b のなす角が60°（cosθ=1/2）のとき、a·b はいくつですか。',
+      correct:'10', options:['9','20','10','1/2'],
+      hints:['a·b=|a||b|cosθ に当てはめましょう。',
+        '4×5×(1/2) を計算しましょう。'],
+      reason:'a·b=|a||b|cosθ=4×5×(1/2)=10 です。cosθ の値だけを答えにしないよう注意しましょう。' },
+    { id:'notation', ask:'内積は、a と b の間にどんな記号を書いて表しますか。',
+      correct:'a·b（中点）', options:['a×b（かけ算の記号）','a·b（中点）','a→b（矢印）'],
+      hints:['ベクトルの外積（この教材では扱いません）と混同しないようにしましょう。',
+        '内積は中点「·」を使って表します。'],
+      reason:'内積は a·b のように中点「·」を使って表します。×（かけ算の記号）は使いません。' }
+  ];
+}
+var S2_MC_OPTIONS = ['正になる', '0になる', '負になる'];
+var S2_MC_CORRECT = '負になる';
+function s2QuizPool(){
+  return [
+    { id:'sign-acute', ask:'θが鋭角（0°<θ<90°）のとき、内積の符号はどうなりますか。',
+      correct:'正になる', options:['正になる','0になる','負になる'],
+      hints:['鋭角のとき、cosθ の符号はどうなるか思い出しましょう。',
+        'cosθ が正の数なら、|a||b|cosθ 全体も正の数になります。'],
+      reason:'鋭角のとき cosθ>0 なので、a·b=|a||b|cosθ は正の数になります。' },
+    { id:'sign-right', ask:'θ=90°のとき、内積の値はいくつになりますか。',
+      correct:'0', options:['0','正の数','負の数'],
+      hints:['θ=90°のとき、cosθ の値はいくつでしたか。',
+        'cos90°=0 です。'],
+      reason:'cos90°=0 なので、a·b=|a||b|×0=0 です。' },
+    { id:'zero-vec-dot', ask:'零ベクトル0=(0, 0) と、ベクトルa=(a₁, a₂) の内積 0·a はいくつになりますか。',
+      correct:'0', options:['|a|','0','a'],
+      hints:['成分での計算 a₁b₁+a₂b₂ に当てはめてみましょう。',
+        '0×a₁+0×a₂ を計算するとどうなりますか。'],
+      reason:'0·a=0×a₁+0×a₂=0 です。零ベクトルは向きを考えないため「なす角θ」が決まりません。そのため、この場合は成分で計算して確かめます。' }
+  ];
+}
+function s3QuizPool(){
+  return [
+    { id:'comp-formula', ask:'a=(5, 2)、b=(1, 4) のとき、a·b はいくつですか。',
+      correct:'13', options:['12','−3','20','13'],
+      hints:['a·b=a₁b₁+a₂b₂ で計算します。',
+        '5×1+2×4 を計算しましょう。'],
+      reason:'a·b=5×1+2×4=5+8=13 です。対応する成分どうしをかけて、足し合わせます。' },
+    { id:'commute', ask:'a·b と b·a を比べると、どんな関係にありますか。',
+      correct:'常に等しい', options:['符号が逆になる','a·bの方が大きい','常に等しい'],
+      hints:['成分での計算 a₁b₁+a₂b₂ と b₁a₁+b₂a₂ を見比べましょう。',
+        'かけ算の順番を入れかえても積は変わりません。'],
+      reason:'a·b=a₁b₁+a₂b₂、b·a=b₁a₁+b₂a₂ で、かけ算の順番が違うだけなので常に等しくなります（交換法則）。' },
+    { id:'self-dot', ask:'a·a は、どんな式と同じになりますか。',
+      correct:'|a|²', options:['|a|','|a|²','2|a|'],
+      hints:['a と a のなす角θは0°です。cos0°はいくつでしたか。',
+        'a·a=|a||a|cos0°=|a|²×1 です。'],
+      reason:'a·a=|a||a|cos0°=|a|²です。自分自身との内積は、大きさの2乗になります。' }
+  ];
+}
+function s4QuizPool(){
+  return [
+    { id:'perp-def', ask:'a≠0、b≠0 のとき、a·b=0 が成り立つとき、a と b はどんな関係にありますか。',
+      correct:'垂直である（a⊥b）', options:['垂直である（a⊥b）','平行である','どちらかが零ベクトルである'],
+      hints:['a·b=|a||b|cosθ=0 で、|a|≠0、|b|≠0 のとき、0になるのはどの部分ですか。',
+        'cosθ=0 になる角度を考えましょう。'],
+      reason:'|a|≠0、|b|≠0 のとき a·b=0 なら cosθ=0、つまりθ=90°です。a と b は垂直（a⊥b）です。' },
+    { id:'perp-misconception', ask:'a=(4, 0)、b=(0, 3) のとき a·b=0 です。このとき |a| や |b| は0ですか。',
+      correct:'0ではない（a,bはどちらも零ベクトルでない）',
+      options:['|a|=0である','|b|=0である','0ではない（a,bはどちらも零ベクトルでない）'],
+      hints:['|a|=√(4²+0²)、|b|=√(0²+3²) を計算してみましょう。',
+        '数の掛け算と違い、内積が0でも、どちらかの大きさが0とは限りません。'],
+      reason:'|a|=4、|b|=3 で、どちらも0ではありません。a·b=0 は「垂直である」ことを表しているだけで、大きさが0という意味ではありません。' },
+    { id:'perp-check', ask:'a=(2, 3)、b=(3, −2) のとき、a と b は垂直と言えますか。',
+      correct:'垂直と言える（a·b=0）',
+      options:['垂直ではない','垂直と言える（a·b=0）','大きさが同じなので垂直'],
+      hints:['a·b を成分で計算してみましょう。',
+        '2×3+3×(−2) を計算しましょう。'],
+      reason:'a·b=2×3+3×(−2)=6−6=0 なので、a と b は垂直です。' }
+  ];
+}
+var SUMMARY_POINTS = [
+  '内積 a·b=|a||b|cosθ は、大きさどうしと cosθ をかけた「数（スカラー）」であり、ベクトルではない',
+  'θが鋭角なら内積は正、θ=90°なら0、θが鈍角なら内積は負になる（符号はcosθの符号で決まる）',
+  '成分では a·b=a₁b₁+a₂b₂ で計算できる。a·b=b·a（交換法則）、a·a=|a|² が成り立つ',
+  'a≠0、b≠0 のとき、a·b=0 ならば a⊥b（垂直）である。内積が0でも、a や b の大きさが0とは限らない'
+];
+var SUMMARY_QA = [
+  { q:'θが鈍角のとき、内積の符号が負になるのはなぜですか。cosθ に触れて説明してみましょう。',
+    points:['鈍角のとき cosθ<0 だから',
+      'a·b=|a||b|cosθ で、|a|、|b|は0以上なので、符号はcosθの符号で決まるから'] },
+  { q:'「a·b=0 ならば、a か b のどちらかは零ベクトルである」という考えは、なぜ間違っていますか。',
+    points:['a·b=0 は a⊥b（垂直）であることを表しているだけだから',
+      'a、b がどちらも零ベクトルでなくても、垂直であれば内積は0になるから'] }
+];
+var CHECKLIST_ITEMS = [
+  TEXTBOOK_REF + 'を読み返し、a·b=|a||b|cosθ の意味を自分の言葉で説明できるか確認する',
+  CHART_REF + 'を見て、垂直条件 a·b=0 を使った問題の考え方を確認する'
+];
+function initialState(){
+  return {
+    stepIndex: 0,
+    navMsg: null,
+    s1: { quiz:newQuizState() },
+    /* thetaState: 今どの角度の状態か（'acute'/'right'/'obtuse'、何度でも切り替えられる）
+       thetaEverObtuse: 一度でも鈍角を見たか（段階ゲートの判定に使う）
+       thetaCount: 切り替えた回数（体験の記録として表示する） */
+    s2: { thetaState:'acute', thetaEverObtuse:false, thetaCount:0,
+          mcAnswered:false, mcSelected:null, mcAttempts:0, mcShowAnswer:false, quiz:newQuizState() },
+    s3: { quiz:newQuizState() },
+    s4: { quiz:newQuizState() },
+    summary: { revealed:[false,false], checklist:[false,false] }
+  };
+}
+var state = initialState();
+/* =========================================================================
+   LESSON-SPECIFIC-DATA-END
+   ========================================================================= */
+/* =========================================================================
+   APP-COMMON-HELPERS-START
+   全教材共通のヘルパー・制御関数（ベクトル版：LAP_KEY_PREFIXのみ変更）。
+   ========================================================================= */
+function frac(numHtml, denHtml){
+  return '<span class="frac"><span class="num">'+numHtml+'</span><span class="den">'+denHtml+'</span></span>';
+}
+function fmtNum(x){
+  if (typeof x === 'object' && x !== null && 'num' in x && 'den' in x) return frac(x.num, x.den);
+  return String(x);
+}
+function escAttr(s){ return String(s).replace(/"/g,'&quot;'); }
+function numOptions(correct, deltas){
+  var set = [correct];
+  deltas.forEach(function(d){
+    var v = correct + d;
+    if (v !== correct && set.indexOf(v) === -1) set.push(v);
+  });
+  set = set.slice(0,4);
+  set.sort(function(a,b){ return a-b; });
+  return set;
+}
+/* 周回数の記録。ベクトル版はキー接頭辞を変更（数列と混ざらないように） */
+var LAP_KEY_PREFIX = 'vector:lap:';
+function lapStorageKey(){
+  return LAP_KEY_PREFIX + (typeof LESSON_ID !== 'undefined' ? LESSON_ID : 'unknown');
+}
+function lapStorageAvailable(){
+  try { return typeof localStorage !== 'undefined' && localStorage !== null; }
+  catch(e){ return false; }
+}
+function readLapCount(){
+  if (!lapStorageAvailable()) return 0;
+  try {
+    var v = parseInt(localStorage.getItem(lapStorageKey()), 10);
+    return (isFinite(v) && v > 0) ? v : 0;
+  } catch(e){ return 0; }
+}
+function writeLapCount(n){
+  if (!lapStorageAvailable()) return n;
+  try { localStorage.setItem(lapStorageKey(), String(n)); } catch(e){}
+  return n;
+}
+function incrementLapCount(){
+  var n = readLapCount() + 1;
+  writeLapCount(n);
+  return n;
+}
+var lapCount = readLapCount();
+var lessonCompleted = false;
+function pickQuestion(pool, avoidId){
+  var candidates = pool;
+  if (pool.length > 1 && avoidId){
+    candidates = pool.filter(function(q){ return q.id !== avoidId; });
+  }
+  return candidates[Math.floor(Math.random()*candidates.length)];
+}
+function renderQuizBlock(pool, qState, answerAction, nextAction){
+  var q = pool.filter(function(p){ return p.id === qState.qid; })[0];
+  if (!q){ q = pickQuestion(pool, null); qState.qid = q.id; }
+  var base = answerAction.replace(/-answer$/, '');
+  var solved = qState.answered && qState.selected === q.correct;
+  var locked = solved || qState.showAnswer;
+  var html = '';
+  if (q.given) html += '<div class="quiz-given">'+q.given+'</div>';
+  html += '<div class="quiz-q">Q. '+q.ask+'</div>';
+  html += '<div class="quiz-options">';
+  q.options.forEach(function(opt){
+    var cls = 'btn sm';
+    if (locked){
+      if (opt === q.correct) cls += ' correct-ans';
+      else if (opt === qState.selected) cls += ' selected';
+    } else if (qState.answered && opt === qState.selected){
+      cls += ' selected';
+    }
+    html += '<button class="'+cls+'" data-action="'+answerAction+'" data-value="'+escAttr(opt)+'" '+(qState.answered?'disabled':'')+'>'+opt+'</button>';
+  });
+  html += '</div>';
+  if (solved){
+    html += '<div class="feedback ok"><b>正解です。</b>'+q.reason+'</div>';
+    html += '<div class="btn-row"><button class="btn" data-action="'+nextAction+'">別の問題にする</button></div>';
+  } else if (qState.showAnswer){
+    html += '<div class="feedback warn"><b>考え方を確認しましょう。</b>'+q.reason+'</div>';
+    html += '<div class="btn-row"><button class="btn" data-action="'+nextAction+'">別の問題にする</button></div>';
+  } else if (qState.answered){
+    var attempts = qState.attempts || 1;
+    var hints = q.hints || [];
+    var hint = hints[Math.min(attempts-1, hints.length-1)] || 'もう一度、問題文と選択肢を見比べてみましょう。';
+    html += '<div class="feedback warn"><b>答えと考え方を確認しましょう。</b>'+hint+'</div>';
+    html += '<div class="btn-row"><button class="btn" data-action="'+base+'-retry">もう一度考える</button>';
+    if (attempts >= 2){
+      html += '<button class="btn ghost" data-action="'+base+'-reveal">考え方を確認する</button>';
+    }
+    html += '</div>';
+  }
+  return html;
+}
+function mcDone(sub, key, correct){
+  return (sub[key+'Answered'] && sub[key+'Selected'] === correct) || sub[key+'ShowAnswer'];
+}
+function mcFeedback(sub, key, correct, hints, correctReason, actionBase){
+  if (!sub[key+'Answered']) return '';
+  var html = '';
+  if (sub[key+'Selected'] === correct){
+    html += '<div class="feedback ok"><b>その通りです。</b>'+correctReason+'</div>';
+  } else if (sub[key+'ShowAnswer']){
+    html += '<div class="feedback warn"><b>考え方を確認しましょう。</b>'+correctReason+'</div>';
+  } else {
+    var attempts = sub[key+'Attempts'] || 1;
+    var hint = hints[Math.min(attempts-1, hints.length-1)];
+    html += '<div class="feedback warn"><b>答えと考え方を確認しましょう。</b>'+hint+'</div>';
+    html += '<div class="btn-row"><button class="btn" data-action="'+actionBase+'-retry">もう一度考える</button>';
+    if (attempts >= 2){
+      html += '<button class="btn ghost" data-action="'+actionBase+'-reveal">考え方を確認する</button>';
+    }
+    html += '</div>';
+  }
+  return html;
+}
+function mcAnswer(sub, key, correct, val){
+  sub[key+'Selected'] = val; sub[key+'Answered'] = true;
+  if (val !== correct) sub[key+'Attempts'] = (sub[key+'Attempts']||0) + 1;
+}
+function mcRetry(sub, key){ sub[key+'Answered'] = false; sub[key+'Selected'] = null; }
+function mcReveal(sub, key){ sub[key+'Answered'] = true; sub[key+'ShowAnswer'] = true; }
+function handleQuizAnswer(sub, pool, val){
+  var q = pool.filter(function(p){ return p.id === sub.quiz.qid; })[0];
+  sub.quiz.selected = val; sub.quiz.answered = true;
+  if (!q || val !== q.correct) sub.quiz.attempts = (sub.quiz.attempts||0) + 1;
+  render();
+}
+function handleQuizRetry(sub){ sub.quiz.answered = false; sub.quiz.selected = null; render(); }
+function handleQuizReveal(sub){ sub.quiz.answered = true; sub.quiz.showAnswer = true; render(); }
+function handleQuizNext(sub, pool){
+  var q = pickQuestion(pool, sub.quiz.qid);
+  sub.quiz = { qid:q.id, selected:null, answered:false, attempts:0, showAnswer:false };
+  render();
+}
+function renderHeader(){
+  var key = STEPS[state.stepIndex];
+  var activeDot = DOT_INDEX[key];
+  var dotsHtml = '';
+  for (var i=0;i<DOT_LABELS.length;i++){
+    var cls = 'stage-dot' + (i===activeDot?' active':'') + (i<activeDot?' done':'');
+    dotsHtml += '<div class="'+cls+'"><div class="dot">'+DOT_LABELS[i]+'</div></div>';
+  }
+  var lapText = lessonCompleted ? (lapCount+'周目 完了') : ((lapCount+1)+'周目');
+  var html = '<p class="header-title"><span class="ht-text">'+document.title+'</span><span class="lap-badge">'+lapText+'</span></p>';
+  html += '<div class="stage-dots">'+dotsHtml+'</div>';
+  html += '<div class="stage-sub">'+STAGE_LABEL[key]+'：'+STAGE_SUBLABEL[key]+'</div>';
+  document.getElementById('app-header').innerHTML = html;
+}
+function summaryAllChecked(){
+  var cl = state.summary && state.summary.checklist;
+  return !!(cl && cl.length && cl.every(function(v){ return v === true; }));
+}
+function renderFooter(){
+  var isFirst = state.stepIndex === 0;
+  var isLast = state.stepIndex === STEPS.length-1;
+  var html = '';
+  html += '<button class="btn ghost" data-action="prev" '+(isFirst?'disabled':'')+'>← 前へ</button>';
+  html += '<button class="btn restart" data-action="restart">最初から</button>';
+  if (isLast){
+    var ready = summaryAllChecked() && !lessonCompleted;
+    html += '<button class="btn complete'+(lessonCompleted?' done':'')+'" data-action="complete" '+(ready?'':'disabled')+'>'+(lessonCompleted?'完了しました':'完了')+'</button>';
+  } else {
+    html += '<button class="btn primary" data-action="next">次へ →</button>';
+  }
+  document.getElementById('app-footer').innerHTML = html;
+}
+function handleComplete(){
+  if (lessonCompleted || !summaryAllChecked()) return;
+  lessonCompleted = true;
+  lapCount = incrementLapCount();
+  render();
+}
+function render(){
+  renderHeader();
+  var key = STEPS[state.stepIndex];
+  var main = document.getElementById('app-main');
+  var html = RENDERERS[key] ? RENDERERS[key]() : '';
+  if (state.navMsg){
+    html += '<div class="panel"><div class="feedback warn"><b>'+state.navMsg+'</b></div></div>';
+    state.navMsg = null;
+  }
+  main.innerHTML = html;
+  renderFooter();
+}
+function goNext(){
+  if (typeof stepGateMessage === 'function'){
+    var gateMsg = stepGateMessage();
+    if (gateMsg){ state.navMsg = gateMsg; render(); return; }
+  }
+  if (state.stepIndex < STEPS.length-1){ state.stepIndex++; render(); window.scrollTo(0,0); }
+}
+function goPrev(){ if (state.stepIndex > 0){ state.stepIndex--; render(); window.scrollTo(0,0); } }
+function restartAll(){ state = initialState(); lessonCompleted = false; render(); window.scrollTo(0,0); }
+/* =========================================================================
+   まとめ画面（3ブロック構成で固定）
+   ========================================================================= */
+function renderSummary(){
+  var s = state.summary;
+  var html = '';
+  html += '<div class="panel">';
+  html += '  <h2 class="stage-title">今日理解したこと</h2>';
+  html += '  <div class="flow-badge">'+flowBadgeInner()+'</div>';
+  html += '  <ul style="padding-left:20px;">';
+  SUMMARY_POINTS.forEach(function(p){ html += '<li style="margin-bottom:4px;">'+p+'</li>'; });
+  html += '  </ul>';
+  html += '</div>';
+  html += '<div class="panel">';
+  html += '  <h2 class="stage-title" style="font-size:1.05em;">自分の言葉で説明してみましょう</h2>';
+  SUMMARY_QA.forEach(function(qa, idx){
+    html += '<div style="margin-bottom:16px;padding-bottom:14px;'+(idx<SUMMARY_QA.length-1?'border-bottom:1px solid var(--border);':'')+'">';
+    html += '<div class="quiz-q">Q'+(idx+1)+'. '+qa.q+'</div>';
+    if (s.revealed[idx]){
+      html += '<div class="feedback ok"><b>正答に必要な要素</b><ul style="margin:4px 0 0;padding-left:18px;">';
+      qa.points.forEach(function(p){ html += '<li>'+p+'</li>'; });
+      html += '</ul></div>';
+    } else {
+      html += '<div class="btn-row"><button class="btn" data-action="summary-reveal" data-value="'+idx+'">答えを見る</button></div>';
+    }
+    html += '</div>';
+  });
+  html += '</div>';
+  html += '<div class="panel">';
+  html += '  <h2 class="stage-title" style="font-size:1.05em;">教科書へ戻る</h2>';
+  html += '  <p class="lead">'+TEXTBOOK_REF+'と、'+CHART_REF+'をもう一度読み、最初に分からなかった言葉や図を自分の言葉で説明してみましょう。</p>';
+  html += '  <div class="checklist">';
+  CHECKLIST_ITEMS.forEach(function(item, idx){
+    html += '<label class="check-item"><input type="checkbox" data-action="summary-check" data-value="'+idx+'" '+(s.checklist[idx]?'checked':'')+'>'+item+'</label>';
+  });
+  html += '  </div>';
+  html += '</div>';
+  return html;
+}
+function handleSummaryReveal(idx){ state.summary.revealed[Number(idx)] = true; render(); }
+function handleSummaryCheck(idx){
+  var i = Number(idx);
+  state.summary.checklist[i] = !state.summary.checklist[i];
+  render();
+}
+document.getElementById('app').addEventListener('click', function(e){
+  var el = e.target.closest('[data-action]');
+  if (!el || el.disabled) return;
+  if (el.tagName === 'INPUT' && el.type === 'checkbox') return;
+  handleAction(el.getAttribute('data-action'), el.getAttribute('data-value'), el);
+});
+document.getElementById('app').addEventListener('change', function(e){
+  var el = e.target;
+  if (el.tagName === 'INPUT' && el.type === 'checkbox' && el.hasAttribute('data-action')){
+    handleAction(el.getAttribute('data-action'), el.getAttribute('data-value'), el);
+  }
+});
+/* =========================================================================
+   APP-COMMON-HELPERS-END
+   ========================================================================= */
+/* =========================================================================
+   LESSON-SPECIFIC-RENDERERS-START
+   ========================================================================= */
+var SVG_OX = 44, SVG_OY = 200, SVG_U = 26;
+var SVG_W = 300, SVG_H = 230;
+function sx(mx){ return SVG_OX + mx*SVG_U; }
+function sy(my){ return SVG_OY - my*SVG_U; }
+var SVG_COLORS = { blue:'var(--n-color)', green:'var(--an-color)', purple:'var(--rule-color)' };
+function svgGridAxis(){
+  var g = '';
+  var i;
+  for (i=0;i<=8;i++){ g += '<line class="grid-line" x1="'+sx(i)+'" y1="'+sy(0)+'" x2="'+sx(i)+'" y2="'+sy(7)+'"/>'; }
+  for (i=0;i<=7;i++){ g += '<line class="grid-line" x1="'+sx(0)+'" y1="'+sy(i)+'" x2="'+sx(8)+'" y2="'+sy(i)+'"/>'; }
+  g += '<line class="axis-line" x1="'+sx(0)+'" y1="'+sy(0)+'" x2="'+sx(8)+'" y2="'+sy(0)+'"/>';
+  g += '<line class="axis-line" x1="'+sx(0)+'" y1="'+sy(0)+'" x2="'+sx(0)+'" y2="'+sy(7)+'"/>';
+  g += '<text class="axis-label" x="'+(sx(8)-2)+'" y="'+(sy(0)+14)+'">x</text>';
+  g += '<text class="axis-label" x="'+(sx(0)-14)+'" y="'+(sy(7)+4)+'">y</text>';
+  g += '<text class="axis-label" x="'+(sx(0)-12)+'" y="'+(sy(0)+14)+'">O</text>';
+  return g;
+}
+/* 矢印の先端。markerUnits="userSpaceOnUse" にして、線の太さに関係なく
+   一定の大きさ（12px）にする。こうしないと線の太さの倍率で拡大され、
+   短い矢印では先端だけが大きく見えてしまう。 */
+function svgMarkers(idp){
+  var m = '';
+  ['blue','green','purple'].forEach(function(c){
+    m += '<marker id="'+idp+'-'+c+'" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">'
+       + '<path d="M0,0 L12,6 L0,12 z" fill="'+SVG_COLORS[c]+'"/></marker>';
+  });
+  return m;
+}
+/* 矢印1本。side に −1 を指定するとラベルを線の反対側へ出す
+   （2本が重なる図で、両方のラベルを重ねずに表示するために使う）。 */
+function svgArrow(idp, color, mx1, my1, mx2, my2, label, dashed, side){
+  var x1=sx(mx1), y1=sy(my1), x2=sx(mx2), y2=sy(my2);
+  var dash = dashed ? ' stroke-dasharray="5 4"' : '';
+  var s = '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+SVG_COLORS[color]+'" stroke-width="2.6" stroke-linecap="round" marker-end="url(#'+idp+'-'+color+')"'+dash+'/>';
+  if (label){
+    var dx = x2-x1, dy = y2-y1;
+    var L = Math.sqrt(dx*dx + dy*dy) || 1;
+    var px = -dy/L, py = dx/L;
+    if (px > 0){ px = -px; py = -py; }
+    if (side === -1){ px = -px; py = -py; }
+    var OFF = 12;
+    var lx = (x1+x2)/2 + px*OFF, ly = (y1+y2)/2 + py*OFF + 5;
+    s += '<text class="vlabel '+color+'" x="'+lx+'" y="'+ly+'" text-anchor="middle">'+label+'</text>';
+  }
+  return s;
+}
+function buildSvg(idp, arrows, extras){
+  var s = '<div class="vec-svg-wrap"><svg class="vec-svg" viewBox="0 0 '+SVG_W+' '+SVG_H+'" role="img">';
+  s += '<defs>'+svgMarkers(idp)+'</defs>';
+  s += svgGridAxis();
+  if (extras) s += extras;
+  arrows.forEach(function(a){
+    s += svgArrow(idp, a.c, a.x1, a.y1, a.x2, a.y2, a.label, a.dashed, a.side);
+  });
+  s += '</svg></div>';
+  return s;
+}
+function vecLegend(items){
+  var s = '<div class="vec-legend">';
+  items.forEach(function(it){
+    s += '<span class="lg '+it.c+'"><span class="swatch" style="border-color:'+SVG_COLORS[it.c]+'"></span>'+it.t+'</span>';
+  });
+  s += '</div>';
+  return s;
+}
+/* なす角の円弧とラベル（05専用の追加ヘルパー）。
+   dirA・dirB は始点Oから見た2本のベクトルの向き（正規化前でよい）、rは弧の半径（目盛り単位）。
+   矢印そのものではない装飾要素なので、R1の「矢印60px以上」は適用しない。 */
+function normDir(x, y){ var l = Math.sqrt(x*x+y*y) || 1; return [x/l, y/l]; }
+function angleArc(ox, oy, ax, ay, bx, by, r){
+  var da = normDir(ax, ay), db = normDir(bx, by);
+  var p1x = sx(ox+r*da[0]), p1y = sy(oy+r*da[1]);
+  var p2x = sx(ox+r*db[0]), p2y = sy(oy+r*db[1]);
+  var rp = r*SVG_U;
+  return '<path class="angle-arc" d="M'+p1x+','+p1y+' A'+rp+','+rp+' 0 0 0 '+p2x+','+p2y+'"/>';
+}
+function angleLabel(ox, oy, ax, ay, bx, by, r, text){
+  var da = normDir(ax, ay), db = normDir(bx, by);
+  var mx = da[0]+db[0], my = da[1]+db[1];
+  var m = normDir(mx, my);
+  var lx = sx(ox+(r+0.35)*m[0]), ly = sy(oy+(r+0.35)*m[1])+5;
+  return '<text class="vlabel purple" x="'+lx+'" y="'+ly+'" text-anchor="middle">'+text+'</text>';
+}
+var IP_O = [2, 2];
+var IP_A = [4, 0];
+var IP_B = { acute:[3, 2], right:[0, 4], obtuse:[-2, 3] };
+var IP_LABEL = { acute:'鋭角', right:'直角', obtuse:'鈍角' };
+var IP_DOT = { acute:12, right:0, obtuse:-8 };
+function ipFigure(idp, thetaKey, bColor){
+  var O = IP_O, A = IP_A, B = IP_B[thetaKey];
+  var extras = angleArc(O[0], O[1], A[0], A[1], B[0], B[1], 0.9)
+    + angleLabel(O[0], O[1], A[0], A[1], B[0], B[1], 0.9, 'θ');
+  return buildSvg(idp, [
+    {c:'blue', x1:O[0], y1:O[1], x2:O[0]+A[0], y2:O[1]+A[1], label:'a'},
+    {c:(bColor||'green'), x1:O[0], y1:O[1], x2:O[0]+B[0], y2:O[1]+B[1], label:'b', side:-1}
+  ], extras);
+}
+function renderStage1(){
+  var html = '';
+  html += '<div class="panel">';
+  html += '  <h2 class="stage-title">2本から1つの数を作る</h2>';
+  html += '  <p class="stage-goal">2本のベクトル a、b から、大きさとなす角θを使って1つの数を作る計算を「内積」といい、a·b と書きます。</p>';
+  html += '  <div class="flow-badge">'+flowBadgeInner()+'</div>';
+  html += '  <p class="lead">下の図は、ベクトル a、b と、そのなす角θです。内積は a·b=|a||b|cosθ で定義されます。</p>';
+  html += ipFigure('s1', 'acute');
+  html += vecLegend([{c:'blue',t:'a'},{c:'green',t:'b'},{c:'purple',t:'なす角 θ'}]);
+  html += '  <p class="lead">a·b は、|a| と |b| と cosθ をかけ合わせた<b>1つの数（スカラー）</b>です。矢印（ベクトル）にはなりません。ここが最初の間違えやすいポイントです。</p>';
+  html += '</div>';
+  html += '<div class="panel">';
+  html += '  <h2 class="stage-title" style="font-size:1.05em;">確認問題</h2>';
+  html += renderQuizBlock(s1QuizPool(), state.s1.quiz, 's1-quiz-answer', 's1-quiz-next');
+  html += '</div>';
+  return html;
+}
+function handleS1QuizAnswer(val){ handleQuizAnswer(state.s1, s1QuizPool(), val); }
+function handleS1QuizRetry(){ handleQuizRetry(state.s1); }
+function handleS1QuizReveal(){ handleQuizReveal(state.s1); }
+function handleS1QuizNext(){ handleQuizNext(state.s1, s1QuizPool()); }
+/* ---- ステージ2：鋭角→直角→鈍角の3状態を何度でも周回できる ---- */
+function renderStage2(){
+  var s = state.s2;
+  var html = '';
+  html += '<div class="panel">';
+  html += '  <h2 class="stage-title">角度で符号が変わるか調べる</h2>';
+  html += '  <p class="stage-goal">a の大きさ・b の大きさは変えずに、なす角θだけを鋭角→直角→鈍角と変えていきます。内積の符号はどう変わるでしょうか。</p>';
+  html += '  <div class="flow-badge">'+flowBadgeInner()+'</div>';
+  html += ipFigure('s2-'+s.thetaState, s.thetaState);
+  html += vecLegend([{c:'blue',t:'a'},{c:'green',t:'b（θ='+IP_LABEL[s.thetaState]+'）'},{c:'purple',t:'なす角 θ'}]);
+  if (s.thetaState === 'acute'){
+    html += '  <p class="lead">今はθが鋭角です。a·b の値は '+IP_DOT.acute+'（正の数）になります。直角、鈍角と切り替えると、符号はどうなるでしょうか。</p>';
+  } else if (s.thetaState === 'right'){
+    html += '  <p class="lead">今はθ=90°（直角）です。a·b の値はちょうど 0 になります。</p>';
+  } else {
+    html += '  <p class="lead">今はθが鈍角です。a·b の値は '+IP_DOT.obtuse+'（<b>負の数</b>）になりました。鈍角になると、内積は負になります。</p>';
+  }
+  html += '  <div class="btn-row">';
+  (function(){
+    var nextLabel = s.thetaState === 'acute' ? '直角に切り替える' : (s.thetaState === 'right' ? '鈍角に切り替える' : '鋭角に戻す');
+    html += '<button class="btn primary" data-action="s2-cycle-theta">'+nextLabel+'</button>';
+  })();
+  html += '  </div>';
+  html += '  <div class="toggle-state"><span class="now">今の状態：θ='
+        + IP_LABEL[s.thetaState] + '</span>'
+        + '<span>切り替えた回数：'+s.thetaCount+' 回</span>'
+        + '<span>何度でも切り替えて見比べられます。</span></div>';
+  if (s.thetaEverObtuse){
+    html += '  <p class="lead" style="margin-top:14px;">Q. θが鈍角のとき、内積の符号はどうなりますか。</p>';
+    html += '  <div class="btn-row">';
+    (function(){
+      var locked = mcDone(s, 'mc', S2_MC_CORRECT);
+      S2_MC_OPTIONS.forEach(function(opt){
+        var cls = 'btn';
+        if (locked){
+          if (opt === S2_MC_CORRECT) cls += ' correct-ans';
+          else if (opt === s.mcSelected) cls += ' selected';
+        } else if (s.mcAnswered && opt === s.mcSelected){
+          cls += ' selected';
+        }
+        html += '<button class="'+cls+'" data-action="s2-mc-answer" data-value="'+escAttr(opt)+'" '+(s.mcAnswered?'disabled':'')+'>'+opt+'</button>';
+      });
+    })();
+    html += '  </div>';
+    html += mcFeedback(s, 'mc', S2_MC_CORRECT,
+      ['鋭角・直角・鈍角を切り替えて、a·bの値がどう変わったか見比べましょう。',
+       'cosθ の符号は、θが90°を超えると（鈍角になると）どうなりますか。'],
+      'θが鈍角のとき cosθ<0 になるので、a·b=|a||b|cosθ 全体も負の数になります。内積をベクトルと誤解しないよう、符号だけが変わる「数」であることを意識しましょう。', 's2-mc');
+  }
+  html += '</div>';
+  if (s.thetaEverObtuse && mcDone(s, 'mc', S2_MC_CORRECT)){
+    html += '<div class="panel">';
+    html += '  <h2 class="stage-title" style="font-size:1.05em;">角度と符号の関係</h2>';
+    html += '  <p class="lead">内積の符号は、なす角θの範囲によって決まります。大きさ |a|、|b| は常に0以上なので、符号を決めるのは cosθ だけです。</p>';
+    html += '<div class="fix-change">';
+    html += '  <div class="fc-box fixed"><span class="fc-label">θ鋭角</span><div class="fc-val">正の数</div></div>';
+    html += '  <div class="fc-box change"><span class="fc-label">θ=90°</span><div class="fc-val">0</div></div>';
+    html += '  <div class="fc-box result"><span class="fc-label">θ鈍角</span><div class="fc-val">負の数</div></div>';
+    html += '</div>';
+    html += '</div>';
+    html += '<div class="panel">';
+    html += '  <h2 class="stage-title" style="font-size:1.05em;">確認問題</h2>';
+    html += renderQuizBlock(s2QuizPool(), state.s2.quiz, 's2-quiz-answer', 's2-quiz-next');
+    html += '</div>';
+  }
+  return html;
+}
+function handleS2CycleTheta(){
+  var s = state.s2;
+  var order = ['acute', 'right', 'obtuse'];
+  var idx = order.indexOf(s.thetaState);
+  s.thetaState = order[(idx+1) % order.length];
+  s.thetaCount = s.thetaCount + 1;
+  if (s.thetaState === 'obtuse') s.thetaEverObtuse = true;
+  render();
+}
+function handleS2McAnswer(val){ mcAnswer(state.s2, 'mc', S2_MC_CORRECT, val); render(); }
+function handleS2McRetry(){ mcRetry(state.s2, 'mc'); render(); }
+function handleS2McReveal(){ mcReveal(state.s2, 'mc'); render(); }
+function handleS2QuizAnswer(val){ handleQuizAnswer(state.s2, s2QuizPool(), val); }
+function handleS2QuizRetry(){ handleQuizRetry(state.s2); }
+function handleS2QuizReveal(){ handleQuizReveal(state.s2); }
+function handleS2QuizNext(){ handleQuizNext(state.s2, s2QuizPool()); }
+function renderStage3(){
+  var html = '';
+  html += '<div class="panel">';
+  html += '  <h2 class="stage-title">成分で内積を計算する</h2>';
+  html += '  <p class="stage-goal">角度が分からなくても、成分が分かれば内積は計算できます。a·b=a₁b₁+a₂b₂ です。</p>';
+  html += '  <div class="flow-badge">'+flowBadgeInner()+'</div>';
+  var extras = '<text class="helper-label" x="'+(sx(0)-10)+'" y="'+(sy(0)+16)+'">O</text>';
+  html += buildSvg('s3', [
+    {c:'blue', x1:0, y1:0, x2:5, y2:2, label:'a'},
+    {c:'green', x1:0, y1:0, x2:1, y2:4, label:'b', side:-1}
+  ], extras);
+  html += vecLegend([{c:'blue',t:'a=(5, 2)'},{c:'green',t:'b=(1, 4)'}]);
+  html += '  <p class="lead">a=(5, 2)、b=(1, 4) のとき、a·b=5×1+2×4=5+8=13 です。角度を求めなくても、成分だけで内積の値が分かります。</p>';
+  html += '<table class="terms"><tr><th>性質</th><th>式</th><th>意味</th></tr>';
+  html += '<tr><td>成分での計算</td><td>a·b=a₁b₁+a₂b₂</td><td>対応する成分をかけて足す</td></tr>';
+  html += '<tr><td>交換法則</td><td>a·b=b·a</td><td>かける順を入れかえても同じ</td></tr>';
+  html += '<tr><td>自分自身との内積</td><td>a·a=|a|²</td><td>大きさの2乗になる（θ=0°、cos0°=1）</td></tr>';
+  html += '</table>';
+  html += '</div>';
+  html += '<div class="panel">';
+  html += '  <h2 class="stage-title" style="font-size:1.05em;">確認問題</h2>';
+  html += renderQuizBlock(s3QuizPool(), state.s3.quiz, 's3-quiz-answer', 's3-quiz-next');
+  html += '</div>';
+  return html;
+}
+function handleS3QuizAnswer(val){ handleQuizAnswer(state.s3, s3QuizPool(), val); }
+function handleS3QuizRetry(){ handleQuizRetry(state.s3); }
+function handleS3QuizReveal(){ handleQuizReveal(state.s3); }
+function handleS3QuizNext(){ handleQuizNext(state.s3, s3QuizPool()); }
+function renderStage4(){
+  var html = '';
+  html += '<div class="panel">';
+  html += '  <h2 class="stage-title">垂直かどうかを判断する</h2>';
+  html += '  <p class="stage-goal">a≠0、b≠0 のとき、a·b=0 ならば a と b は垂直（a⊥b）です。ただし、これは「大きさが0」という意味ではありません。</p>';
+  html += '  <div class="flow-badge">'+flowBadgeInner()+'</div>';
+  var extras = '<text class="helper-label" x="'+(sx(0)-10)+'" y="'+(sy(0)+16)+'">O</text>';
+  html += buildSvg('s4', [
+    {c:'blue', x1:0, y1:0, x2:4, y2:0, label:'a'},
+    {c:'green', x1:0, y1:0, x2:0, y2:3, label:'b', side:-1}
+  ], extras);
+  html += vecLegend([{c:'blue',t:'a=(4, 0)'},{c:'green',t:'b=(0, 3)'}]);
+  html += '  <p class="lead">a=(4, 0)、b=(0, 3) のとき、a·b=4×0+0×3=0 です。a と b は垂直（a⊥b）です。</p>';
+  html += '  <p class="lead"><b>注意</b>：a·b=0 だからといって、|a| や |b| が0になるわけではありません。|a|=4、|b|=3 で、どちらも0ではないのに、内積は0です。数どうしのかけ算（「かけて0ならどちらかが0」）と混同しないようにしましょう。ここが間違えやすいポイントです。</p>';
+  html += '</div>';
+  html += '<div class="panel">';
+  html += '  <h2 class="stage-title" style="font-size:1.05em;">確認問題</h2>';
+  html += renderQuizBlock(s4QuizPool(), state.s4.quiz, 's4-quiz-answer', 's4-quiz-next');
+  html += '</div>';
+  return html;
+}
+function handleS4QuizAnswer(val){ handleQuizAnswer(state.s4, s4QuizPool(), val); }
+function handleS4QuizRetry(){ handleQuizRetry(state.s4); }
+function handleS4QuizReveal(){ handleQuizReveal(state.s4); }
+function handleS4QuizNext(){ handleQuizNext(state.s4, s4QuizPool()); }
+function stepGateMessage(){
+  var key = STEPS[state.stepIndex];
+  if (key === 's2' && !(state.s2.thetaEverObtuse && mcDone(state.s2, 'mc', S2_MC_CORRECT))){
+    return 'このステージには、まだ確認していない内容があります。先に現在の問題を進めましょう。';
+  }
+  return null;
+}
+var RENDERERS = {
+  s1: renderStage1,
+  s2: renderStage2,
+  s3: renderStage3,
+  s4: renderStage4,
+  summary: renderSummary
+};
+function handleAction(action, value, el){
+  switch(action){
+    case 'next': goNext(); break;
+    case 'prev': goPrev(); break;
+    case 'restart': restartAll(); break;
+    case 'complete': handleComplete(); break;
+    case 's1-quiz-answer': handleS1QuizAnswer(value); break;
+    case 's1-quiz-retry': handleS1QuizRetry(); break;
+    case 's1-quiz-reveal': handleS1QuizReveal(); break;
+    case 's1-quiz-next': handleS1QuizNext(); break;
+    case 's2-cycle-theta': handleS2CycleTheta(); break;
+    case 's2-mc-answer': handleS2McAnswer(value); break;
+    case 's2-mc-retry': handleS2McRetry(); break;
+    case 's2-mc-reveal': handleS2McReveal(); break;
+    case 's2-quiz-answer': handleS2QuizAnswer(value); break;
+    case 's2-quiz-retry': handleS2QuizRetry(); break;
+    case 's2-quiz-reveal': handleS2QuizReveal(); break;
+    case 's2-quiz-next': handleS2QuizNext(); break;
+    case 's3-quiz-answer': handleS3QuizAnswer(value); break;
+    case 's3-quiz-retry': handleS3QuizRetry(); break;
+    case 's3-quiz-reveal': handleS3QuizReveal(); break;
+    case 's3-quiz-next': handleS3QuizNext(); break;
+    case 's4-quiz-answer': handleS4QuizAnswer(value); break;
+    case 's4-quiz-retry': handleS4QuizRetry(); break;
+    case 's4-quiz-reveal': handleS4QuizReveal(); break;
+    case 's4-quiz-next': handleS4QuizNext(); break;
+    case 'summary-reveal': handleSummaryReveal(value); break;
+    case 'summary-check': handleSummaryCheck(value); break;
+  }
+}
+/* =========================================================================
+   LESSON-SPECIFIC-RENDERERS-END
+   ========================================================================= */
+/* ---------- 初期表示 ---------- */
+render();
+</script>
+</body>
+</html>

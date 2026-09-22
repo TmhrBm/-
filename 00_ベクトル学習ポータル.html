@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>数学C ベクトル 学習ポータル</title>
+<style>
+:root{
+  --n-color:#1d4ed8;
+  --n-bg:#e5edfc;
+  --an-color:#0f7a3d;
+  --an-bg:#e2f5e9;
+  --rule-color:#be185d;
+  --rule-bg:#fce7f3;
+  --correct:#178a43;
+  --correct-bg:#e5f7ec;
+  --caution:#c65a12;
+  --caution-bg:#fdf0e4;
+  --bg:#f6f7fa;
+  --card:#ffffff;
+  --border:#dfe3ea;
+  --text:#20242c;
+  --text-soft:#666f7d;
+  --radius:14px;
+  --radius-sm:8px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic Medium","Yu Gothic","Meiryo",system-ui,-apple-system,sans-serif;
+  line-height:1.75;
+  font-size:16px;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit;}
+#wrap{max-width:980px;margin:0 auto;padding:0 18px 40px;}
+button,a.btn{font-family:inherit;cursor:pointer;}
+a:focus-visible,button:focus-visible{outline:3px solid #93b4f7;outline-offset:2px;}
+header#top{
+  padding:22px 0 14px;
+  border-bottom:1px solid var(--border);
+  margin-bottom:20px;
+}
+header#top h1{font-size:1.5em;margin:0 0 6px;}
+header#top p{margin:0;color:var(--text-soft);font-size:.95em;}
+section{margin-bottom:26px;}
+h2.sec-title{font-size:1.12em;margin:0 0 10px;border-left:5px solid var(--n-color);padding-left:10px;}
+.panel{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:16px 18px;
+}
+table.flow{width:100%;border-collapse:collapse;font-size:.93em;}
+table.flow th,table.flow td{border:1px solid var(--border);padding:8px 10px;text-align:left;}
+table.flow th{background:#f2f4f8;color:var(--text-soft);font-weight:700;width:34%;}
+.route{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:6px;}
+.route .chip{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:4px 10px;border-radius:999px;font-size:.85em;font-weight:700;
+  background:var(--n-bg);color:var(--n-color);white-space:nowrap;
+}
+.route .chip.adv{background:var(--rule-bg);color:var(--rule-color);}
+.route .arrow{color:var(--text-soft);font-weight:700;}
+.route .route-label{font-size:.85em;color:var(--text-soft);font-weight:700;margin-right:4px;white-space:nowrap;}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px;}
+.card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:16px;display:flex;flex-direction:column;gap:8px;scroll-margin-top:14px;
+}
+.card-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.card-head .num{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:30px;height:30px;border-radius:50%;background:var(--n-color);color:#fff;
+  font-weight:800;font-size:.92em;flex:0 0 auto;
+}
+.diff{padding:2px 9px;border-radius:999px;font-size:.78em;font-weight:700;}
+.diff.basic{background:var(--an-bg);color:var(--an-color);}
+.diff.standard{background:var(--n-bg);color:var(--n-color);}
+.diff.advanced{background:var(--rule-bg);color:var(--rule-color);}
+.card h3{margin:0;font-size:1.08em;}
+.card p{margin:0;font-size:.9em;}
+.card p.concept{color:var(--text);font-weight:700;}
+.card p.prereq{color:var(--text-soft);}
+.card p.pages{color:var(--text-soft);font-size:.84em;}
+.card p.adv-note{color:var(--rule-color);font-size:.82em;}
+.card-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:4px;}
+a.btn.open{
+  display:inline-block;border:2px solid var(--n-color);background:var(--n-color);color:#fff;
+  padding:7px 14px;border-radius:10px;font-size:.9em;font-weight:700;text-decoration:none;
+}
+a.btn.open:hover{background:#1a44b8;}
+.lap-badge{display:none;background:var(--an-bg);color:var(--an-color);border-radius:999px;padding:2px 10px;font-size:.82em;font-weight:700;white-space:nowrap;}
+.lap-badge.shown{display:inline-flex;}
+p.lap-note{font-size:.82em;color:var(--text-soft);margin-top:2px;}
+.focus-list{display:flex;flex-direction:column;gap:8px;}
+.focus-item{
+  display:flex;flex-wrap:wrap;align-items:center;gap:8px;
+  border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;background:var(--card);
+}
+.focus-item .ft{font-weight:700;flex:1 1 220px;font-size:.94em;}
+.focus-item a.jump{
+  font-size:.85em;font-weight:700;color:var(--n-color);background:var(--n-bg);
+  padding:3px 10px;border-radius:999px;text-decoration:none;
+}
+footer#bottom{color:var(--text-soft);font-size:.82em;padding-top:10px;border-top:1px solid var(--border);}
+@media (max-width:520px){
+  #wrap{padding:0 14px 32px;}
+  header#top h1{font-size:1.28em;}
+  .cards{grid-template-columns:1fr;}
+  table.flow th{width:40%;}
+}
+@media print{
+  body{background:#fff;}
+  a.btn.open{border-color:#000;background:#fff;color:#000;}
+  .cards{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+<div id="wrap">
+<header id="top">
+  <h1>数学C「ベクトル」学習ポータル ― 全12単元</h1>
+  <p>平面ベクトル（01〜07）と空間ベクトル（08〜12）。カードをクリックすると各教材がひらきます。</p>
+</header>
+
+<section id="flow">
+  <h2 class="sec-title">進め方</h2>
+  <div class="panel">
+    <table class="flow">
+      <tr><th>概念・図形イメージ</th><td>教材＋東進映像</td></tr>
+      <tr><th>解法パターン・計算定着</th><td>黄チャート</td></tr>
+      <tr><th>記述演習</th><td>黄チャート章末／CanPass文系</td></tr>
+      <tr><th>仕上げ</th><td>九大過去問10〜15年のベクトル大問</td></tr>
+    </table>
+  </div>
+</section>
+
+<section id="map">
+  <h2 class="sec-title">学習順マップ</h2>
+  <div class="panel">
+    <div class="route">
+      <span class="route-label">平面</span>
+      <span class="chip">01</span><span class="arrow">→</span>
+      <span class="chip">02</span><span class="arrow">→</span>
+      <span class="chip">03</span><span class="arrow">→</span>
+      <span class="chip">04</span><span class="arrow">→</span>
+      <span class="chip">05</span><span class="arrow">→</span>
+      <span class="chip">06</span><span class="arrow">→</span>
+      <span class="chip adv">07 発展</span>
+    </div>
+    <div class="route">
+      <span class="route-label">空間</span>
+      <span class="chip">04</span><span class="arrow">→</span>
+      <span class="chip">08</span><span class="arrow">→</span>
+      <span class="chip">09</span><span class="arrow">→</span>
+      <span class="chip">10</span><span class="arrow">→</span>
+      <span class="chip">11</span><span class="arrow">→</span>
+      <span class="chip adv">12 発展</span>
+    </div>
+    <p class="lap-note" style="margin-top:10px;">07・12は「発展」単元です。基礎の確認で終える人はスキップしてもかまいません。</p>
+  </div>
+</section>
+
+<section id="lessons">
+  <h2 class="sec-title">単元一覧（全12単元）</h2>
+  <div class="cards">
+
+    <article class="card" id="lesson-01">
+      <div class="card-head"><span class="num">01</span><span class="diff basic">基礎</span></div>
+      <h3>ベクトルとは</h3>
+      <p class="concept">向きと大きさで決まる</p>
+      <p class="prereq">前提：なし</p>
+      <p class="pages">教科書 p.8〜9／黄チャート p.492〜493</p>
+      <div class="card-foot">
+        <a class="btn open" href="01_12_ベクトルとは_体験教材.html">教材をひらく</a>
+        <span class="lap-badge" data-lesson="01"></span>
+      </div>
+    </article>
+
+    <article class="card" id="lesson-02">
+      <div class="card-head"><span class="num">02</span><span class="diff basic">基礎</span></div>
+      <h3>加法・減法</h3>
+      <p class="concept">つなぐと和、差は引き算</p>
+      <p class="prereq">前提：01</p>
+      <p class="pages">教科書 p.10〜12／黄チャート p.492〜495・p.499</p>
+      <div class="card-foot">
+        <a class="btn open" href="02_12_加法・減法_体験教材.html">教材をひらく</a>
+        <span class="lap-badge" data-lesson="02"></span>
+      </div>
+    </article>
+
+    <article class="card" id="lesson-03">
+      <div class="card-head"><span class="num">03</span><span class="diff basic">基礎</span></div>
+      <h3>実数倍と平行条件</h3>
+      <p class="concept">長さを変え向きは同じか真逆</p>
+      <p class="prereq">前提：02</p>
+      <p class="pages">教科書 p.13〜15／黄チャート p.492〜493・p.496〜498</p>
+      <div class="card-foot">
+        <a class="btn open" href="03_12_実数倍と平行条件_体験教材.html">教材をひらく</a>
+        <span class="lap-badge" data-lesson="03"></span>
+      </div>
+    </article>
+
+    <article class="card" id="lesson-04">
+      <div class="card-head"><span class="num">04</span><span class="diff basic">基礎</span></div>
+      <h3>成分表示</h3>
+      <p class="concept">横移動・縦移動の数の組</p>
+      <p class="prereq">前提：03</p>
+      <p class="pages">教科書 p.17〜20／黄チャート p.501〜507</p>
+      <div class="card-foot">
+        <a class="btn open" href="04_12_成分表示_体験教材.html">教材をひらく</a>
+        <span class="lap-badge" data-lesson="04"></span>
+      </div>
+    </article>
+
+    <article class="card" id="lesson-05">
+      <div class="card-head"><span class="num">05</span><span class="diff standard">標準</span></div>
+      <h3>内積</h3>
+      <p class="concept">2本から1つの数、垂直・角度</p>
+      <p class="prereq">前提：04</p>
+      <p class="pages">教科書 p.21〜27／黄チャート p.509〜519</p>
+      <div class="card-foot">
+        <a class="btn open" href="05_12_内積_体験教材.html">教材をひらく</a>
+        <span class="lap-badge" data-lesson="05"></span>
+      </div>
+    </article>
+
+    <article class="card" id="lesson-06">
+      <div class="card-head"><span class="num">06</span><span class="diff standard">標準</span></div>
+      <h3>位置ベクトルと内分・重心</h3>
+      <p class="concept">基準点からの矢印</p>
+      <p class="prereq">前提：05</p>
+      <p class="pages">教科書 p.31〜35／黄チャート p.527〜533</p>
+      <div class="card-foot">
+        <a class="btn open" href="06_12_位置ベクトルと内分・重心_体験教材.html">教材をひらく</a>
+        <span class="lap-badge" data-lesson="06"></span>
+      </div>
+    </article>
+
+    <article class="card" id="lesson-07">
+      <div class="card-head"><span class="num">07</span><span class="diff advanced">発展</span></div>
+      <h3>ベクトルと図形</h3>
+      <p class="concept">一直線条件・ベクトル方程式</p>
+      <p class="prereq">前提：06</p>
+      <p class="pages">教科書 p.36・p.40〜42／黄チャート p.527・p.535・p.547〜556</p>
+      <p class="adv-note">発展：基礎に自信がある人向け（苦手なら後回しでもOK）</p>
+      <div class="card-foot">
+        <a class="btn open" href="07_12_ベクトルと図形_体験教材.html">教材をひらく</a>
+        <span class="lap-badge" data-lesson="07"></span>
+      </div>
+    </article>
+
+    <article class="card" id="lesson-08">
+      <div class="card-head"><span class="num">08</span><span class="diff basic">基礎</span></div>
+      <h3>空間座標と空間ベクトルの成分</h3>
+      <p class="concept">(x,y)に奥行きzを足す</p>
+      <p class="prereq">前提：04</p>
+      <p class="pages">教科書 p.49〜57／黄チャート p.565〜572</p>
+      <div class="card-foot">
+        <a class="btn open" href="08_12_空間座標と空間ベクトルの成分_体験教材.html">教材をひらく</a>
+        <span class="lap-badge" data-lesson="08"></span>
+      </div>
+    </article>
+
+    <article class="card" id="lesson-09">
+      <div class="card-head"><span class="num">09</span><span class="diff standard">標準</span></div>
+      <h3>空間の一次結合と共面条件</h3>
+      <p class="concept">OP↑=sOA↑+tOB↑+uOC↑, s+t+u=1</p>
+      <p class="prereq">前提：08</p>
+      <p class="pages">教科書 p.63〜65／黄チャート p.585・p.590〜594・p.602・p.610</p>
+      <div class="card-foot">
+        <a class="btn open" href="09_12_空間の一次結合と共面条件_体験教材.html">教材をひらく</a>
+        <span class="lap-badge" data-lesson="09"></span>
+      </div>
+    </article>
+
+    <article class="card" id="lesson-10">
+      <div class="card-head"><span class="num">10</span><span class="diff standard">標準</span></div>
+      <h3>空間の内積・直交条件と垂線</h3>
+      <p class="concept">空間でも垂直=内積0、垂線の足</p>
+      <p class="prereq">前提：09</p>
+      <p class="pages">教科書 p.58〜60・p.66／黄チャート p.573〜574・p.578〜579・p.595・p.599</p>
+      <div class="card-foot">
+        <a class="btn open" href="10_12_空間の内積・直交条件と垂線_体験教材.html">教材をひらく</a>
+        <span class="lap-badge" data-lesson="10"></span>
+      </div>
+    </article>
+
+    <article class="card" id="lesson-11">
+      <div class="card-head"><span class="num">11</span><span class="diff standard">標準</span></div>
+      <h3>円・球のベクトル方程式</h3>
+      <p class="concept">距離・内積の条件式が表す図形</p>
+      <p class="prereq">前提：10</p>
+      <p class="pages">教科書 p.44・p.69／黄チャート p.548・p.559〜560・p.602〜603・p.606・p.609</p>
+      <div class="card-foot">
+        <a class="btn open" href="11_12_円・球のベクトル方程式_体験教材.html">教材をひらく</a>
+        <span class="lap-badge" data-lesson="11"></span>
+      </div>
+    </article>
+
+    <article class="card" id="lesson-12">
+      <div class="card-head"><span class="num">12</span><span class="diff advanced">発展</span></div>
+      <h3>四面体の体積</h3>
+      <p class="concept">底面積×高さ÷3をベクトルで組み立てる</p>
+      <p class="prereq">前提：10・11</p>
+      <p class="pages">教科書 p.28・p.60・p.64・p.74／黄チャート p.510・p.520〜521・p.580・p.598</p>
+      <p class="adv-note">発展：基礎に自信がある人向け（苦手なら後回しでもOK）</p>
+      <div class="card-foot">
+        <a class="btn open" href="12_12_四面体の体積_体験教材.html">教材をひらく</a>
+        <span class="lap-badge" data-lesson="12"></span>
+      </div>
+    </article>
+
+  </div>
+  <p class="lap-note" id="lap-note">このブラウザで教材を最後まで進めると、ここに周回数（○周）が表示されます。</p>
+</section>
+
+<section id="focus">
+  <h2 class="sec-title">九大文系の重点（差がつく分野）</h2>
+  <div class="focus-list">
+    <div class="focus-item">
+      <span class="ft">共面条件（s+t+u=1）</span>
+      <a class="jump" href="#lesson-09">09へ</a>
+    </div>
+    <div class="focus-item">
+      <span class="ft">内積・直交条件・垂線の足</span>
+      <a class="jump" href="#lesson-05">05へ</a>
+      <a class="jump" href="#lesson-10">10へ</a>
+    </div>
+    <div class="focus-item">
+      <span class="ft">円・球のベクトル方程式（|p−c|=r、(p−a)·(p−b)=0、|p−a|=|p−b|、球と平面の交わり=円）</span>
+      <a class="jump" href="#lesson-11">11へ</a>
+    </div>
+    <div class="focus-item">
+      <span class="ft">四面体の体積・距離</span>
+      <a class="jump" href="#lesson-12">12へ</a>
+    </div>
+  </div>
+</section>
+
+<footer id="bottom">
+  九州大学教育学部（文系数学）二次試験対策。大問4問中1問がベクトル・図形分野。
+  空間ベクトルが頻出かつ得点源、差がつく分野のため空間（08〜12）も外していません。
+</footer>
+</div>
+<script>
+'use strict';
+(function(){
+  function readLap(id){
+    try{
+      var v = parseInt(localStorage.getItem('vector:lap:'+id), 10);
+      return (isFinite(v) && v > 0) ? v : 0;
+    }catch(e){ return 0; }
+  }
+  var badges = document.querySelectorAll('.lap-badge');
+  var any = false, i, el, id, n;
+  for (i=0; i<badges.length; i++){
+    el = badges[i];
+    id = el.getAttribute('data-lesson');
+    n = readLap(id);
+    if (n > 0){
+      el.textContent = n + '周';
+      el.className = el.className + ' shown';
+      any = true;
+    }
+  }
+  var note = document.getElementById('lap-note');
+  if (note){ note.style.display = any ? 'none' : ''; }
+})();
+</script>
+</body>
+</html>
